@@ -59,6 +59,7 @@ pub enum Error {
     InvalidParameter(String),
 }
 
+
 /// Library version information
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 

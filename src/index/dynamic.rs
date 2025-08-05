@@ -77,7 +77,7 @@ impl DynamicIndex {
             return Err(Error::DimensionMismatch {
                 expected: self.dimension,
                 actual: vector.len(),
-            });
+            }.into());
         }
         
         // Get or allocate ID
@@ -175,7 +175,7 @@ impl DynamicIndex {
             return Err(Error::DimensionMismatch {
                 expected: self.dimension,
                 actual: query.len(),
-            });
+            }.into());
         }
         
         let vectors = self.vectors.read();
@@ -414,10 +414,10 @@ impl StreamingIndex {
             vector,
             labels,
             callback: callback_tx,
-        }).map_err(|_| Error::Index("Update channel closed".to_owned()).into())?;
+        }).map_err(|_| anyhow::anyhow!("Update channel closed"))?;
         
         callback_rx.recv()
-            .map_err(|_| Error::Index("Callback channel closed".to_owned()).into())?
+            .map_err(|_| anyhow::anyhow!("Callback channel closed"))?
     }
     
     /// Delete a vector asynchronously
@@ -427,10 +427,10 @@ impl StreamingIndex {
         self.update_tx.send(UpdateOp::Delete {
             id,
             callback: callback_tx,
-        }).map_err(|_| Error::Index("Update channel closed".to_owned()).into())?;
+        }).map_err(|_| anyhow::anyhow!("Update channel closed"))?;
         
         callback_rx.recv()
-            .map_err(|_| Error::Index("Callback channel closed".to_owned()).into())?
+            .map_err(|_| anyhow::anyhow!("Callback channel closed"))?
     }
     
     /// Trigger consolidation asynchronously
@@ -439,10 +439,10 @@ impl StreamingIndex {
         
         self.update_tx.send(UpdateOp::Consolidate {
             callback: callback_tx,
-        }).map_err(|_| Error::Index("Update channel closed".to_owned()).into())?;
+        }).map_err(|_| anyhow::anyhow!("Update channel closed"))?;
         
         callback_rx.recv()
-            .map_err(|_| Error::Index("Callback channel closed".to_owned()).into())?
+            .map_err(|_| anyhow::anyhow!("Callback channel closed"))?
     }
     
     /// Search (immediate, not queued)

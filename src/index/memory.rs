@@ -30,15 +30,12 @@ impl MemoryIndex {
     ) -> Result<Self> {
         // Validate vectors
         if vectors.is_empty() {
-            return Err(Error::InvalidParameter("No vectors provided".to_owned()).into());
+            return Err(anyhow::anyhow!("No vectors provided"));
         }
         
         for (i, vec) in vectors.iter().enumerate() {
             if vec.len() != dimension {
-                return Err(Error::DimensionMismatch {
-                    expected: dimension,
-                    actual: vec.len(),
-                }.into());
+                return Err(anyhow::anyhow!("Dimension mismatch: expected {}, got {}", dimension, vec.len()));
             }
         }
         
@@ -67,26 +64,23 @@ impl MemoryIndex {
     /// Add a new vector to the index
     pub fn add(&mut self, vector: Vec<f32>) -> Result<usize> {
         if vector.len() != self.dimension {
-            return Err(Error::DimensionMismatch {
-                expected: self.dimension,
-                actual: vector.len(),
-            }.into());
+            return Err(anyhow::anyhow!("Dimension mismatch: expected {}, got {}", self.dimension, vector.len()));
         }
         
         // This would require making vectors mutable and rebuilding parts of the graph
         // For now, return an error
-        Err(Error::Index("Dynamic insertion not yet implemented".to_owned()).into())
+Err(anyhow::anyhow!("Dynamic insertion not yet implemented"))
     }
     
     /// Remove a vector from the index
     pub fn remove(&mut self, id: usize) -> Result<()> {
         if id >= self.vectors.len() {
-            return Err(Error::InvalidParameter("Invalid vector ID".to_owned()).into());
+            return Err(anyhow::anyhow!("Invalid vector ID"));
         }
         
         // This would require marking vectors as deleted and handling in search
         // For now, return an error
-        Err(Error::Index("Dynamic deletion not yet implemented".to_owned()).into())
+Err(anyhow::anyhow!("Dynamic deletion not yet implemented"))
     }
     
     /// Get index statistics
@@ -116,10 +110,7 @@ impl MemoryIndex {
 impl Index for MemoryIndex {
     fn search(&self, query: &[f32], k: usize) -> Result<Vec<(usize, f32)>> {
         if query.len() != self.dimension {
-            return Err(Error::DimensionMismatch {
-                expected: self.dimension,
-                actual: query.len(),
-            }.into());
+            return Err(anyhow::anyhow!("Dimension mismatch: expected {}, got {}", self.dimension, query.len()));
         }
         
         self.graph.search(query, k, &self.vectors)
