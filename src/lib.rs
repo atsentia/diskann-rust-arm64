@@ -27,6 +27,12 @@ pub mod pq;
 /// General utilities and helpers
 pub mod utils;
 
+/// Label and filter support
+pub mod labels;
+
+/// Data type support (int8, uint8, float16, float32)
+pub mod types;
+
 // Re-export commonly used types
 pub use distance::{Distance, DistanceFunction};
 pub use index::{Index, IndexBuilder};
