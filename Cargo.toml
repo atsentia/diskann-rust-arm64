@@ -101,6 +101,10 @@ harness = false
 name = "index"
 harness = false
 
+[[bench]]
+name = "comprehensive"
+harness = false
+
 [[bin]]
 name = "diskann"
 path = "src/bin/main.rs"
@@ -112,6 +116,26 @@ path = "examples/cold_disk_benchmark.rs"
 [[example]]
 name = "simd_benchmark"
 path = "examples/simd_benchmark.rs"
+
+[[example]]
+name = "gpu_vs_cpu"
+path = "examples/gpu_vs_cpu.rs"
+
+[[example]]
+name = "multi_gpu"
+path = "examples/multi_gpu.rs"
+
+[[example]]
+name = "platform_specific_gpu"
+path = "examples/platform_specific_gpu.rs"
+
+[[example]]
+name = "batch_optimization"
+path = "examples/batch_optimization.rs"
+
+[[example]]
+name = "performance_benchmark"
+path = "examples/performance_benchmark.rs"
 
 [profile.release]
 lto = "fat"
