@@ -153,7 +153,12 @@ impl LabelIndex {
     }
     
     /// Get labels for a vector
-    pub fn get_labels(&self, vector_id: usize) -> Option<&LabelSet> {
+    pub fn get_labels(&self, vector_id: usize) -> Option<Vec<Label>> {
+        self.vector_labels.get(vector_id).map(|ls| ls.labels().to_vec())
+    }
+    
+    /// Get label set for a vector
+    pub fn get_label_set(&self, vector_id: usize) -> Option<&LabelSet> {
         self.vector_labels.get(vector_id)
     }
     
@@ -183,6 +188,72 @@ impl LabelIndex {
         let mut labels: Vec<Label> = self.unique_labels.iter().copied().collect();
         labels.sort_unstable();
         labels
+    }
+    
+    /// Get candidate vectors that match the given filter
+    pub fn get_candidates(&self, filter: &LabelFilter) -> Result<HashSet<usize>> {
+        let mut candidates = HashSet::new();
+        
+        match filter {
+            LabelFilter::Any => {
+                // Return all vectors
+                for i in 0..self.vector_labels.len() {
+                    candidates.insert(i);
+                }
+            }
+            LabelFilter::AnyOf(labels) => {
+                // Union of all vectors with any of these labels
+                for &label in labels {
+                    for &vector_id in self.get_vectors_with_label(label) {
+                        candidates.insert(vector_id);
+                    }
+                }
+                
+                // Also include vectors with universal label
+                for &vector_id in self.get_vectors_with_label(UNIVERSAL_LABEL) {
+                    candidates.insert(vector_id);
+                }
+            }
+            LabelFilter::AllOf(labels) => {
+                if labels.is_empty() {
+                    // If no labels specified, return all vectors
+                    for i in 0..self.vector_labels.len() {
+                        candidates.insert(i);
+                    }
+                } else {
+                    // Intersection of vectors with all these labels
+                    let mut first = true;
+                    for &label in labels {
+                        let label_vectors: HashSet<usize> = self.get_vectors_with_label(label)
+                            .iter()
+                            .copied()
+                            .collect();
+                        
+                        if first {
+                            candidates = label_vectors;
+                            first = false;
+                        } else {
+                            candidates = candidates.intersection(&label_vectors).copied().collect();
+                        }
+                    }
+                    
+                    // Also include vectors with universal label
+                    for &vector_id in self.get_vectors_with_label(UNIVERSAL_LABEL) {
+                        candidates.insert(vector_id);
+                    }
+                }
+            }
+            LabelFilter::Exact(labels) => {
+                // Find vectors with exactly these labels
+                for (vector_id, label_set) in self.vector_labels.iter().enumerate() {
+                    if filter.matches(label_set) {
+                        candidates.insert(vector_id);
+                    }
+                }
+            }
+        }
+        
+        Ok(candidates)
     }
     
     /// Get label statistics
@@ -226,7 +297,60 @@ pub struct LabelStats {
     pub label_distribution: HashMap<Label, usize>,
 }
 
-/// Filter parameters for search
+/// Label filter for search operations
+#[derive(Debug, Clone)]
+pub enum LabelFilter {
+    /// Match any vector (no filtering)
+    Any,
+    /// Match vectors with any of these labels (OR operation)
+    AnyOf(Vec<Label>),
+    /// Match vectors with all of these labels (AND operation)
+    AllOf(Vec<Label>),
+    /// Match vectors with exactly these labels
+    Exact(Vec<Label>),
+}
+
+impl LabelFilter {
+    /// Create a filter that matches any of the given labels
+    pub fn any_of(labels: Vec<Label>) -> Self {
+        let mut sorted_labels = labels;
+        sorted_labels.sort_unstable();
+        sorted_labels.dedup();
+        LabelFilter::AnyOf(sorted_labels)
+    }
+    
+    /// Create a filter that matches all of the given labels
+    pub fn all_of(labels: Vec<Label>) -> Self {
+        let mut sorted_labels = labels;
+        sorted_labels.sort_unstable();
+        sorted_labels.dedup();
+        LabelFilter::AllOf(sorted_labels)
+    }
+    
+    /// Create a filter that matches exactly the given labels
+    pub fn exact(labels: Vec<Label>) -> Self {
+        let mut sorted_labels = labels;
+        sorted_labels.sort_unstable();
+        sorted_labels.dedup();
+        LabelFilter::Exact(sorted_labels)
+    }
+    
+    /// Check if this filter matches a label set
+    pub fn matches(&self, label_set: &LabelSet) -> bool {
+        match self {
+            LabelFilter::Any => true,
+            LabelFilter::AnyOf(labels) => label_set.matches_any(labels),
+            LabelFilter::AllOf(labels) => label_set.matches_all(labels),
+            LabelFilter::Exact(labels) => {
+                let set_labels = label_set.labels();
+                set_labels.len() == labels.len() && 
+                set_labels.iter().zip(labels.iter()).all(|(a, b)| a == b)
+            }
+        }
+    }
+}
+
+/// Filter parameters for search (deprecated - use LabelFilter instead)
 #[derive(Debug, Clone)]
 pub struct FilterParams {
     /// Labels to filter by (OR operation)

@@ -236,8 +236,8 @@ impl DynamicIndex {
         {
             let labels = self.labels.read();
             for (old_id, new_id) in &id_mapping {
-                if let Some(label_set) = labels.get_labels(*old_id) {
-                    new_labels.set_labels(*new_id, label_set.labels().to_vec());
+                if let Some(label_vec) = labels.get_labels(*old_id) {
+                    new_labels.set_labels(*new_id, label_vec);
                 }
             }
         }

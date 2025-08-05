@@ -32,6 +32,9 @@ pub mod types;
 /// File format support (fvecs, bvecs, ivecs, binary)
 pub mod formats;
 
+/// Search algorithms (range search, filtered search)
+pub mod search;
+
 // Re-export commonly used types
 pub use distance::{Distance, DistanceFunction};
 pub use index::{Index, IndexBuilder};

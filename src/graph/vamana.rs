@@ -225,8 +225,8 @@ impl VamanaGraph {
             .iter()
             .map(|&id| {
                 let dist = self.distance_fn.distance(
-                    &vectors[vertex_id],
-                    &vectors[id]
+                    vectors[vertex_id].as_slice(),
+                    vectors[id].as_slice()
                 ).unwrap();
                 Neighbor { id, distance: dist }
             })
@@ -248,10 +248,9 @@ impl VamanaGraph {
             let mut should_prune = false;
             
             for &selected_id in &pruned {
-                let dist_to_selected = self.distance_fn.distance(
-                    &vectors[neighbor.id],
-                    &vectors[selected_id]
-                )?;
+                let neighbor_slice: &[f32] = vectors[neighbor.id].as_slice();
+                let selected_slice: &[f32] = vectors[selected_id].as_slice();
+                let dist_to_selected = self.distance_fn.distance(neighbor_slice, selected_slice)?;
                 if dist_to_selected < neighbor.distance {
                     should_prune = true;
                     break;
@@ -322,6 +321,38 @@ impl VamanaGraph {
         results.truncate(k);
         
         Ok(results)
+    }
+    
+    /// Get entry point for search
+    pub fn get_entry_point(&self) -> usize {
+        self.entry_point.load(AtomicOrdering::Relaxed)
+    }
+    
+    /// Get neighbors of a vertex
+    pub fn get_neighbors(&self, vertex_id: usize) -> Vec<usize> {
+        let graph = self.graph.read();
+        if vertex_id < graph.len() {
+            graph[vertex_id].clone()
+        } else {
+            Vec::new()
+        }
+    }
+    
+    /// Find a valid entry point for dynamic index
+    pub fn find_valid_entry_point(&self, vectors: &[Option<Vec<f32>>]) -> usize {
+        let entry = self.entry_point.load(AtomicOrdering::Relaxed);
+        if entry < vectors.len() && vectors[entry].is_some() {
+            return entry;
+        }
+        
+        // Find first valid vector
+        for (i, v) in vectors.iter().enumerate() {
+            if v.is_some() {
+                return i;
+            }
+        }
+        
+        0 // Fallback
     }
     
     /// Get graph statistics
@@ -555,8 +586,8 @@ impl VamanaGraph {
             
             for &selected_id in &pruned {
                 if selected_id < vectors.len() {
-                    if let Some(selected_vec) = (vectors[selected_id]).as_ref() {
-                        if let Some(neighbor_vec) = vectors[neighbor.id].as_ref() {
+                    if let Some(selected_vec) = &vectors[selected_id] {
+                        if let Some(neighbor_vec) = &vectors[neighbor.id] {
                             let dist_to_selected = self.distance_fn.distance(neighbor_vec, selected_vec)?;
                             if dist_to_selected < neighbor.distance {
                                 should_prune = true;
