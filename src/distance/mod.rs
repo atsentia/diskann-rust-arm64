@@ -14,6 +14,18 @@ pub mod avx2;
 #[cfg(all(target_arch = "x86_64", feature = "avx512"))]
 pub mod avx512;
 
+#[cfg(all(target_arch = "x86_64", feature = "sse42"))]
+pub mod sse42;
+
+#[cfg(all(target_arch = "x86_64", feature = "fma4"))]
+pub mod amd_fma4;
+
+#[cfg(all(target_arch = "aarch64", feature = "sve"))]
+pub mod arm_sve;
+
+#[cfg(all(target_arch = "x86_64", feature = "amx"))]
+pub mod intel_amx;
+
 /// Portable SIMD implementations using pure Rust
 pub mod simd;
 
@@ -58,16 +70,40 @@ pub trait DistanceFunction: Send + Sync {
 /// Factory function to create the best distance function for the current platform
 pub fn create_distance_function(metric: Distance, dimension: usize) -> Box<dyn DistanceFunction> {
     // Check CPU features at runtime and select the best implementation
+    // Priority order: Most advanced SIMD → Older SIMD → Portable SIMD
+    
+    // ARM64 processors
+    #[cfg(all(target_arch = "aarch64", feature = "sve"))]
+    {
+        // SVE intrinsics not yet stable, so this will always be false for now
+        if false { // arm_sve::ArmSveDistance::has_sve_support() when available
+            log::debug!("Using ARM64 SVE SIMD optimizations for {} distance (dim={})", metric_name(metric), dimension);
+            return Box::new(arm_sve::ArmSveDistance::new(metric, dimension));
+        }
+    }
+    
     #[cfg(all(target_arch = "aarch64", feature = "neon"))]
     {
         if crate::has_neon_support() {
+            log::debug!("Using ARM64 NEON SIMD optimizations for {} distance (dim={})", metric_name(metric), dimension);
             return Box::new(neon::NeonDistance::new(metric, dimension));
+        }
+    }
+    
+    // x86-64 processors (newest to oldest)
+    #[cfg(all(target_arch = "x86_64", feature = "amx"))]
+    {
+        // AMX intrinsics not yet stable, so this will always be false for now
+        if dimension >= 512 && false { // intel_amx::IntelAmxDistance::has_amx_support() when available
+            log::debug!("Using Intel AMX SIMD optimizations for {} distance (dim={})", metric_name(metric), dimension);
+            return Box::new(intel_amx::IntelAmxDistance::new(metric, dimension));
         }
     }
     
     #[cfg(all(target_arch = "x86_64", feature = "avx512"))]
     {
         if is_x86_feature_detected!("avx512f") {
+            log::debug!("Using x86-64 AVX-512 SIMD optimizations for {} distance (dim={})", metric_name(metric), dimension);
             return Box::new(avx512::Avx512Distance::new(metric, dimension));
         }
     }
@@ -75,12 +111,39 @@ pub fn create_distance_function(metric: Distance, dimension: usize) -> Box<dyn D
     #[cfg(all(target_arch = "x86_64", feature = "avx2"))]
     {
         if crate::has_avx2_support() {
+            log::debug!("Using x86-64 AVX2 SIMD optimizations for {} distance (dim={})", metric_name(metric), dimension);
             return Box::new(avx2::Avx2Distance::new(metric, dimension));
         }
     }
     
+    #[cfg(all(target_arch = "x86_64", feature = "fma4"))]
+    {
+        if is_x86_feature_detected!("fma4") {
+            log::debug!("Using AMD FMA4 SIMD optimizations for {} distance (dim={})", metric_name(metric), dimension);
+            return Box::new(amd_fma4::AmdFma4Distance::new(metric, dimension));
+        }
+    }
+    
+    #[cfg(all(target_arch = "x86_64", feature = "sse42"))]
+    {
+        if is_x86_feature_detected!("sse4.2") {
+            log::debug!("Using x86-64 SSE4.2 SIMD optimizations for {} distance (dim={})", metric_name(metric), dimension);
+            return Box::new(sse42::Sse42Distance::new(metric, dimension));
+        }
+    }
+    
     // Use portable SIMD implementation as default before scalar
+    log::debug!("Using portable SIMD implementation for {} distance (dim={})", metric_name(metric), dimension);
     Box::new(simd::SimdDistance::new(metric, dimension))
+}
+
+/// Get human-readable name for distance metric
+fn metric_name(metric: Distance) -> &'static str {
+    match metric {
+        Distance::L2 => "L2",
+        Distance::Cosine => "Cosine", 
+        Distance::InnerProduct => "InnerProduct",
+    }
 }
 
 /// Alignment requirements for SIMD operations

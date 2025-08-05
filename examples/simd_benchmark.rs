@@ -7,6 +7,11 @@ use diskann::{Distance, distance::create_distance_function, utils::generate_rand
 use std::time::Instant;
 
 fn main() {
+    // Initialize logging to see SIMD selection
+    env_logger::Builder::from_default_env()
+        .filter_level(log::LevelFilter::Debug)
+        .init();
+    
     println!("DiskANN SIMD Performance Benchmark");
     println!("===================================");
     
@@ -18,6 +23,11 @@ fn main() {
     println!("  ARM64 NEON: {}", diskann::has_neon_support());
     println!("  x86-64 AVX2: {}", diskann::has_avx2_support());
     println!("  x86-64 AVX-512: {}", diskann::has_avx512_support());
+    println!();
+    
+    // Create a distance function to trigger SIMD selection logging  
+    println!("SIMD Implementation Selection:");
+    let _test_fn = create_distance_function(Distance::L2, 128);
     println!();
     
     for &dim in &dimensions {
