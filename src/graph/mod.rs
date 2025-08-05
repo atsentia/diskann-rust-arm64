@@ -3,6 +3,7 @@
 //! This module implements the Vamana graph construction and search algorithms.
 
 pub mod vamana;
+pub mod vamana_fixed;
 pub mod search;
 pub mod prune;
 

@@ -1,6 +1,6 @@
 //! Medium scale (25K vectors) benchmark to directly compare with C++ DiskANN
 
-use diskann::graph::vamana::VamanaGraph;
+use diskann::graph::vamana_fixed::{VamanaGraphFixed, VamanaParams};
 use diskann::distance::Distance;
 use std::time::Instant;
 
@@ -11,7 +11,8 @@ fn main() {
     let num_vectors = 25000;
     let dimension = 128;
     let max_degree = 64;
-    let search_list_size = 75;
+    let search_list_size = 100;  // L for search
+    let build_list_size = 750;   // L for build (C++ DEFAULT_MAXC)
     let alpha = 1.2;
     
     println!("📊 Test Configuration:");
@@ -19,6 +20,7 @@ fn main() {
     println!("   Dimension: {}", dimension);
     println!("   Max degree: {}", max_degree);
     println!("   Search list size: {}", search_list_size);
+    println!("   Build list size: {}", build_list_size);
     println!("   Alpha: {}", alpha);
     println!("   Threads: {}", rayon::current_num_threads());
     
@@ -44,14 +46,20 @@ fn main() {
         .build()
         .unwrap();
     
-    let (seq_time, seq_rate) = pool.install(|| {
-        let mut seq_graph = VamanaGraph::new(
+    let (seq_time, seq_rate, seq_stats) = pool.install(|| {
+        let params = VamanaParams {
+            max_degree,
+            search_list_size,
+            build_list_size,
+            alpha,
+            graph_slack_factor: 1.05,
+        };
+        
+        let mut seq_graph = VamanaGraphFixed::new(
             num_vectors,
             dimension,
             Distance::L2,
-            max_degree,
-            search_list_size,
-            alpha,
+            params,
         );
         
         let start = Instant::now();
@@ -59,21 +67,29 @@ fn main() {
         let elapsed = start.elapsed();
         
         let rate = num_vectors as f64 / elapsed.as_secs_f64();
+        let stats = seq_graph.stats();
         println!("   Time: {:.2}s", elapsed.as_secs_f64());
         println!("   Rate: {:.0} vectors/sec", rate);
+        println!("   Avg degree: {:.1}", stats.avg_degree);
         
-        (elapsed, rate)
+        (elapsed, rate, stats)
     });
     
     // Test 3: Parallel build (all threads)
     println!("\n🚀 Parallel Build ({} threads):", rayon::current_num_threads());
-    let mut par_graph = VamanaGraph::new(
+    let params = VamanaParams {
+        max_degree,
+        search_list_size,
+        build_list_size,
+        alpha,
+        graph_slack_factor: 1.05,
+    };
+    
+    let mut par_graph = VamanaGraphFixed::new(
         num_vectors,
         dimension,
         Distance::L2,
-        max_degree,
-        search_list_size,
-        alpha,
+        params,
     );
     
     let par_start = Instant::now();
@@ -119,8 +135,11 @@ fn main() {
     println!("\n🔍 Search Performance Test:");
     let num_queries = 1000;
     let k = 10;
-    let search_list = 50;
     
+    // Note: VamanaGraphFixed doesn't have search yet, so we'll skip this for now
+    println!("   Search test skipped (not implemented in fixed version yet)");
+    
+    /*
     let mut total_time = std::time::Duration::ZERO;
     for i in 0..num_queries {
         let query = &vectors[i * 25]; // Sample queries
@@ -135,6 +154,7 @@ fn main() {
     println!("   Queries: {}", num_queries);
     println!("   Avg latency: {} μs", avg_latency.as_micros());
     println!("   QPS: {:.0}", qps);
+    */
     
     println!("\n✅ Benchmark completed!");
 }

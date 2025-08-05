@@ -1,0 +1,18 @@
+🚀 Medium Scale Benchmark - Rust vs C++ Comparison
+==================================================
+📊 Test Configuration:
+   Vectors: 25000
+   Dimension: 128
+   Max degree: 64
+   Search list size: 100
+   Build list size: 750
+   Alpha: 1.2
+   Threads: 8
+
+⏳ Generating test data...
+   ✅ Generated in 0.01s
+
+🎯 Note: Medoid calculation is part of build process
+
+📋 Sequential Build (1 thread):
+🔗 Building graph (C++ compatible algorithm)...
