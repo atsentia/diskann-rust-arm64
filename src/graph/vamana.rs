@@ -6,7 +6,8 @@
 use crate::{Distance, DistanceFunction, Result, Error};
 use crate::distance::create_distance_function;
 use parking_lot::RwLock;
-use std::collections::{BinaryHeap, HashSet};
+use std::collections::BinaryHeap;
+use hashbrown::HashSet;
 use std::cmp::Ordering;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering as AtomicOrdering};
@@ -245,8 +246,8 @@ impl VamanaGraph {
             .iter()
             .map(|&id| {
                 let dist = self.distance_fn.distance(
-                    vectors[vertex_id].as_slice(),
-                    vectors[id].as_slice()
+                    &vectors[vertex_id][..],
+                    &vectors[id][..]
                 ).unwrap();
                 Neighbor { id, distance: dist }
             })
@@ -268,8 +269,8 @@ impl VamanaGraph {
             let mut should_prune = false;
             
             for &selected_id in &pruned {
-                let neighbor_vec = &vectors[neighbor.id];
-                let selected_vec: &[f32] = vectors[selected_id].as_slice();
+                let neighbor_vec: &[f32] = &vectors[neighbor.id];
+                let selected_vec: &[f32] = &vectors[selected_id];
                 let dist_to_selected = self.distance_fn.distance(neighbor_vec, selected_vec)?;
                 if dist_to_selected < neighbor.distance {
                     should_prune = true;

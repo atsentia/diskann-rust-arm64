@@ -9,7 +9,7 @@ use crate::distance::create_distance_function;
 use crate::labels::{LabelSet, LabelIndex};
 use parking_lot::RwLock;
 use std::sync::Arc;
-use std::collections::{HashSet, HashMap};
+use hashbrown::{HashSet, HashMap};
 use crossbeam_channel::{bounded, Sender, Receiver};
 use std::sync::atomic::{AtomicUsize, AtomicBool, Ordering};
 

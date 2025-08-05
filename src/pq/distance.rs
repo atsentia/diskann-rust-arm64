@@ -5,7 +5,7 @@
 
 use crate::{Result, Distance};
 use crate::distance::simd;
-use std::collections::HashMap;
+use hashbrown::HashMap;
 
 /// Precomputed distance lookup table for PQ codes
 /// 

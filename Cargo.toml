@@ -48,6 +48,7 @@ byteorder = "1.5"
 rand = "0.8"
 lru = "0.12"
 ordered-float = "4.2"
+hashbrown = "0.14"
 
 # Python bindings
 pyo3 = { version = "0.20", features = ["extension-module"], optional = true }
@@ -90,6 +91,10 @@ path = "src/bin/main.rs"
 [[example]]
 name = "cold_disk_benchmark"
 path = "examples/cold_disk_benchmark.rs"
+
+[[example]]
+name = "simd_benchmark"
+path = "examples/simd_benchmark.rs"
 
 [profile.release]
 lto = "fat"

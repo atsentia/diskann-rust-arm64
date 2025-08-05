@@ -141,6 +141,23 @@ impl DistanceFunction for ScalarDistance {
     }
 }
 
+/// Standalone scalar distance function for fallback purposes
+pub fn scalar_distance(a: &[f32], b: &[f32], metric: Distance) -> Result<f32> {
+    if a.len() != b.len() {
+        return Err(Error::DimensionMismatch {
+            expected: a.len(),
+            actual: b.len(),
+        }.into());
+    }
+    
+    let result = match metric {
+        Distance::L2 => ScalarDistance::l2_distance_scalar(a, b),
+        Distance::Cosine => ScalarDistance::cosine_distance_scalar(a, b),
+        Distance::InnerProduct => -ScalarDistance::dot_product_scalar(a, b),
+    };
+    Ok(result)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

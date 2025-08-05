@@ -6,7 +6,8 @@
 use crate::{Result, Distance, DistanceFunction};
 use crate::distance::create_distance_function;
 use crate::graph::VamanaGraph;
-use std::collections::{HashSet, BinaryHeap};
+use std::collections::BinaryHeap;
+use hashbrown::HashSet;
 use std::cmp::Ordering;
 
 /// Neighbor with distance information for range search

@@ -6,7 +6,6 @@
 use crate::{Result, Distance};
 use crate::pq::kmeans::{KMeans, KMeansParams};
 use crate::utils::aligned::AlignedVec;
-use std::collections::HashMap;
 
 /// Product Quantization parameters
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]

@@ -7,7 +7,8 @@ use crate::{Result, Distance, DistanceFunction};
 use crate::distance::create_distance_function;
 use crate::graph::VamanaGraph;
 use crate::labels::{LabelIndex, LabelFilter};
-use std::collections::{HashSet, BinaryHeap};
+use std::collections::BinaryHeap;
+use hashbrown::HashSet;
 use std::cmp::Ordering;
 
 /// Search result with labels

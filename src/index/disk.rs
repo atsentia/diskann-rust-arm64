@@ -405,7 +405,7 @@ impl PQFlashIndex {
 
         // Initialize search with entry point
         let mut candidates = std::collections::BinaryHeap::new();
-        let mut visited = std::collections::HashSet::new();
+        let mut visited = hashbrown::HashSet::new();
         let mut result_candidates = Vec::new();
 
         // Add entry point

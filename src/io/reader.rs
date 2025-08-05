@@ -5,7 +5,7 @@
 use crate::{Result, Error};
 use memmap2::{Mmap, MmapOptions};
 use parking_lot::RwLock;
-use std::collections::HashMap;
+use hashbrown::HashMap;
 use std::fs::File;
 use std::path::Path;
 use std::sync::Arc;
@@ -38,10 +38,7 @@ impl MmapReader {
     #[inline]
     pub fn read_at(&self, offset: usize, buf: &mut [u8]) -> Result<()> {
         if offset + buf.len() > self.len {
-            return Err(Error::Io(std::io::Error::new(
-                std::io::ErrorKind::UnexpectedEof,
-                "Read beyond end of file"
-            )).into());
+            return Err(Error::Io("Read beyond end of file".to_string()).into());
         }
         
         buf.copy_from_slice(&self.mmap[offset..offset + buf.len()]);
@@ -52,10 +49,7 @@ impl MmapReader {
     #[inline]
     pub fn slice(&self, offset: usize, len: usize) -> Result<&[u8]> {
         if offset + len > self.len {
-            return Err(Error::Io(std::io::Error::new(
-                std::io::ErrorKind::UnexpectedEof,
-                "Slice beyond end of file"
-            )).into());
+            return Err(Error::Io("Slice beyond end of file".to_string()).into());
         }
         
         Ok(&self.mmap[offset..offset + len])
@@ -237,10 +231,7 @@ impl BufferedReader {
     fn refill_buffer(&mut self) -> Result<()> {
         let to_read = self.buffer.len().min(self.reader.len() - self.file_pos);
         if to_read == 0 {
-            return Err(Error::Io(std::io::Error::new(
-                std::io::ErrorKind::UnexpectedEof,
-                "End of file"
-            )).into());
+            return Err(Error::Io("End of file".to_string()).into());
         }
         
         self.reader.read_at(self.file_pos, &mut self.buffer[..to_read])?;

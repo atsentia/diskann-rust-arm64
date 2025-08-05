@@ -3,7 +3,8 @@
 //! This module provides efficient search implementations with various optimizations.
 
 use crate::Result;
-use std::collections::{BinaryHeap, HashSet};
+use std::collections::BinaryHeap;
+use hashbrown::HashSet;
 
 /// Search parameters for tuning performance vs accuracy
 #[derive(Debug, Clone)]

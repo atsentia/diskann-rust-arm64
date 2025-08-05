@@ -6,7 +6,7 @@
 use clap::Args;
 use console::style;
 use std::path::PathBuf;
-use std::collections::HashMap;
+use hashbrown::HashMap;
 
 use crate::*;
 

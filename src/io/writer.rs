@@ -48,26 +48,17 @@ impl IndexHeader {
     
     pub fn from_bytes(bytes: &[u8]) -> Result<Self> {
         if bytes.len() != Self::SIZE {
-            return Err(Error::Io(std::io::Error::new(
-                std::io::ErrorKind::InvalidData,
-                "Invalid header size"
-            )).into());
+            return Err(Error::Io("Invalid header size".to_string()).into());
         }
         
         let header: Self = unsafe { std::ptr::read(bytes.as_ptr() as *const Self) };
         
         if &header.magic != Self::MAGIC {
-            return Err(Error::Io(std::io::Error::new(
-                std::io::ErrorKind::InvalidData,
-                "Invalid magic number"
-            )).into());
+            return Err(Error::Io("Invalid magic number".to_string()).into());
         }
         
         if header.version != Self::VERSION {
-            return Err(Error::Io(std::io::Error::new(
-                std::io::ErrorKind::InvalidData,
-                format!("Unsupported version: {}", header.version)
-            )).into());
+            return Err(Error::Io(format!("Unsupported version: {}", header.version)).into());
         }
         
         Ok(header)

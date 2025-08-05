@@ -3,7 +3,7 @@
 //! This module provides caching mechanisms for DiskANN.
 
 use parking_lot::RwLock;
-use std::collections::HashMap;
+use hashbrown::HashMap;
 use std::sync::Arc;
 
 /// Cache entry
