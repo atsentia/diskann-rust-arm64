@@ -1,0 +1,36 @@
+DiskANN Disk Scalability Benchmark - Ampere ARM64
+Timestamp: 20250805_154446
+Dimension: 128
+Query Count: 1000
+
+=== Small Test (10000 vectors) ===
+Step 1: Vector Generation Started
+Vector generation: 0.02s (606531 vectors/sec)
+Step 2: Index Build Started
+Index build: 7.89s (1267 vectors/sec)
+File Statistics:
+  Index file: 0.00 MB
+  PQ file: 0.08 MB
+  Reorder file: 4.88 MB
+  Total size: 4.96 MB
+  Raw size: 4.88 MB
+  Compression ratio: 1.0x
+  Bytes per vector: 520.0
+Step 4: Search Benchmark Started
+Search validation: 1000 queries in 0.006907s = 144790 QPS
+Latency breakdown: avg=6.3μs, P99=15.0μs
+TIMING VERIFICATION:
+  Total search time: 0.006906557s (6.907ms)
+  Time per query: 0.006907ms (6.9μs)
+  Calculated QPS: 144790 (1000 / 0.006907s)
+  Individual latencies range: 6.0μs to 56.0μs
+Build Time: 7.89s (1267 vectors/sec)
+Index Size: 5.0 MB (compression: 1.0x)
+Search QPS: 144790 (6.3μs avg, 15.0μs P99)
+Memory Usage: Build 17592186044337.6 MB, Search 0.0 MB
+Recall: @1=0.947, @10=0.986
+
+=== Medium Test (100000 vectors) ===
+Step 1: Vector Generation Started
+Vector generation: 0.15s (668744 vectors/sec)
+Step 2: Index Build Started

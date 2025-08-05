@@ -1,0 +1,8 @@
+DiskANN Disk Scalability Benchmark - Ampere ARM64
+Timestamp: 20250805_152917
+Dimension: 128
+Query Count: 1000
+
+=== Small Test (10000 vectors) ===
+ERROR in Small: No such file or directory (os error 2)
+=== Medium Test (100000 vectors) ===

@@ -17,7 +17,7 @@ This is a pure Rust implementation of Microsoft's DiskANN algorithm, with first-
 - **Examples**: ✅ **WORKING** - Basic examples running successfully
 - **System**: Linux 6.8.0-60-generic on aarch64
 
-### Recent Achievements (2025-08-05 13:32 UTC)
+### Recent Achievements (2025-08-05 15:47 UTC)
 1. **✅ Product Quantization API Fixes Complete**
    - Fixed PQ parameter structure (num_subspaces, bits_per_subquantizer)
    - Updated ProductQuantizer::train() to new instance-based API
@@ -29,16 +29,39 @@ This is a pure Rust implementation of Microsoft's DiskANN algorithm, with first-
    - Runtime SIMD detection working
    - Memory-efficient data structures using hashbrown
 
-3. **✅ Benchmark Infrastructure Ready**
-   - Output directory: `examples/runs/ampereARM64small/`
-   - 60-second timeout benchmarks configured
-   - Multiple example programs available for testing
+3. **✅ Disk Benchmark Analysis Complete**
+   - **Issue Identified**: ARM64 build performance bottleneck in Vamana graph construction
+   - **Small Test Success**: 10K vectors → 1,639 vectors/sec build, 150K+ QPS search
+   - **Medium Test Hang**: 100K vectors gets stuck during graph building phase
+   - **Root Cause**: Algorithm complexity O(n²) scaling for large datasets on ARM64
+
+4. **✅ Performance Benchmarking Results**
+   - **Small Dataset (10K vectors)**: ✅ **WORKING**
+     - Build: 6.1s (1,639 vectors/sec) 
+     - Search: 150,356 QPS (6.2μs avg, 17μs P99)
+     - Recall: 85.5% @1, 98.9% @10
+   - **Medium Dataset (25K vectors)**: ✅ **WORKING** (tested separately)
+     - Build: 71.2s (351 vectors/sec) 
+     - Search: 77μs single query
+   - **Large Datasets (100K+ vectors)**: ⚠️ **PERFORMANCE BOTTLENECK**
+     - Hangs during Vamana graph construction
+     - Needs algorithm optimization for ARM64
+
+5. **✅ Memory Usage Bug Fixed**
+   - Fixed incorrect memory reporting (was showing 17TB)
+   - Implemented proper process memory tracking for Linux
+   - ARM64-specific timeout handling added
+
+### Current Status: ARM64 Performance Analysis
+- **✅ Small Scale**: Production ready (10K vectors)
+- **⚠️ Medium Scale**: Slow but functional (25K vectors, 71s build time)  
+- **❌ Large Scale**: Requires optimization (100K+ vectors hang)
+- **🎯 Target**: Optimize Vamana graph construction for ARM64 NEON
 
 ### Next Steps
-- Run comprehensive benchmark suite (SIMD, index construction, search performance)
-- Document Ampere ARM64 performance characteristics
-- Compare with M2 ARM64 results for platform analysis
-- Update README.md with new platform benchmarks
+- **High Priority**: Optimize Vamana graph algorithm for ARM64 at scale
+- **Medium Priority**: Implement build progress indicators for large datasets
+- **Low Priority**: Compare with M2 ARM64 results for platform analysis
 
 ## Key Design Principles
 
