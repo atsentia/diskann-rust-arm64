@@ -90,6 +90,18 @@ pub fn has_avx2_support() -> bool {
     false
 }
 
+/// Check if x86-64 AVX512 is available at runtime
+#[cfg(target_arch = "x86_64")]
+pub fn has_avx512_support() -> bool {
+    is_x86_feature_detected!("avx512f")
+}
+
+/// Check if x86-64 AVX512 is available at runtime
+#[cfg(not(target_arch = "x86_64"))]
+pub fn has_avx512_support() -> bool {
+    false
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -99,5 +111,6 @@ mod tests {
         // Just ensure these functions compile and run
         let _ = has_neon_support();
         let _ = has_avx2_support();
+        let _ = has_avx512_support();
     }
 }
