@@ -3,8 +3,7 @@
 //! This module provides an in-memory index using the Vamana graph algorithm.
 
 use crate::{Distance, Index, Result, Error};
-use crate::graph::{VamanaGraph, SearchParams, SearchScratch, beam_search};
-use crate::distance::create_distance_function;
+use crate::graph::VamanaGraph;
 use parking_lot::RwLock;
 use std::sync::Arc;
 
@@ -14,12 +13,9 @@ pub struct MemoryIndex {
     graph: VamanaGraph,
     /// Stored vectors
     vectors: Arc<Vec<Vec<f32>>>,
-    /// Search scratch spaces (one per thread)
-    scratch_pool: RwLock<Vec<SearchScratch>>,
     /// Index configuration
     dimension: usize,
     metric: Distance,
-    search_params: SearchParams,
 }
 
 impl MemoryIndex {
@@ -34,7 +30,7 @@ impl MemoryIndex {
     ) -> Result<Self> {
         // Validate vectors
         if vectors.is_empty() {
-            return Err(Error::InvalidParameter("No vectors provided".to_string()).into());
+            return Err(Error::InvalidParameter("No vectors provided".to_owned()).into());
         }
         
         for (i, vec) in vectors.iter().enumerate() {
@@ -59,37 +55,14 @@ impl MemoryIndex {
         
         graph.build(&vectors)?;
         
-        // Create search parameters
-        let search_params = SearchParams {
-            search_list_size,
-            k: 10, // Default, will be overridden in search
-            alpha,
-            use_bitvector: num_vertices > 10000, // Use bit vector for large graphs
-        };
-        
         Ok(Self {
             graph,
             vectors: Arc::new(vectors),
-            scratch_pool: RwLock::new(Vec::new()),
             dimension,
             metric,
-            search_params,
         })
     }
     
-    /// Get or create a search scratch space
-    fn get_scratch(&self) -> SearchScratch {
-        let mut pool = self.scratch_pool.write();
-        pool.pop().unwrap_or_else(|| SearchScratch::new(self.vectors.len()))
-    }
-    
-    /// Return a scratch space to the pool
-    fn return_scratch(&self, scratch: SearchScratch) {
-        let mut pool = self.scratch_pool.write();
-        if pool.len() < 64 { // Limit pool size
-            pool.push(scratch);
-        }
-    }
     
     /// Add a new vector to the index
     pub fn add(&mut self, vector: Vec<f32>) -> Result<usize> {
@@ -102,18 +75,18 @@ impl MemoryIndex {
         
         // This would require making vectors mutable and rebuilding parts of the graph
         // For now, return an error
-        Err(Error::Index("Dynamic insertion not yet implemented".to_string()).into())
+        Err(Error::Index("Dynamic insertion not yet implemented".to_owned()).into())
     }
     
     /// Remove a vector from the index
     pub fn remove(&mut self, id: usize) -> Result<()> {
         if id >= self.vectors.len() {
-            return Err(Error::InvalidParameter("Invalid vector ID".to_string()).into());
+            return Err(Error::InvalidParameter("Invalid vector ID".to_owned()).into());
         }
         
         // This would require marking vectors as deleted and handling in search
         // For now, return an error
-        Err(Error::Index("Dynamic deletion not yet implemented".to_string()).into())
+        Err(Error::Index("Dynamic deletion not yet implemented".to_owned()).into())
     }
     
     /// Get index statistics
@@ -149,12 +122,6 @@ impl Index for MemoryIndex {
             }.into());
         }
         
-        // Update search params with requested k
-        let mut params = self.search_params.clone();
-        params.k = k;
-        params.search_list_size = params.search_list_size.max(k);
-        
-        // Use the lower-level search for better performance
         self.graph.search(query, k, &self.vectors)
     }
     

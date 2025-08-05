@@ -150,7 +150,7 @@ impl IndexWriter {
                 return Err(Error::DimensionMismatch {
                     expected: self.header.dimension as usize,
                     actual: vector.len(),
-                });
+                }.into());
             }
             
             // Write vector data
@@ -207,7 +207,7 @@ impl StreamingWriter {
             return Err(Error::DimensionMismatch {
                 expected: self.writer.header.dimension as usize,
                 actual: vector.len(),
-            });
+            }.into());
         }
         
         self.buffer.push(vector);

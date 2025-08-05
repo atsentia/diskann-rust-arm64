@@ -326,7 +326,7 @@ pub fn read_binary<P: AsRef<Path>>(path: P) -> Result<(Vec<Vec<f32>>, usize, Vec
         1 => VectorType::Float16,
         2 => VectorType::Int8,
         3 => VectorType::UInt8,
-        _ => return Err(Error::InvalidParameter("Unknown vector type".to_string())),
+        _ => return Err(Error::InvalidParameter("Unknown vector type".to_owned()).into()),
     };
     
     // Read vectors based on type
@@ -397,7 +397,7 @@ pub fn write_binary<P: AsRef<Path>>(
             return Err(Error::DimensionMismatch {
                 expected: dimension as usize,
                 actual: vector.len(),
-            });
+            }.into());
         }
         
         // Convert and write based on type
@@ -438,7 +438,7 @@ pub fn convert_format<P1: AsRef<Path>, P2: AsRef<Path>>(
 ) -> Result<()> {
     // Detect input format
     let input_format = VectorFormat::from_path(&input_path)
-        .ok_or_else(|| Error::InvalidParameter("Unknown input format".to_string()))?;
+        .ok_or_else(|| Error::InvalidParameter("Unknown input format".to_owned()).into())?;
     
     // Read vectors
     let (vectors, _) = match input_format {

@@ -9,6 +9,7 @@ use parking_lot::RwLock;
 use std::collections::{BinaryHeap, HashSet};
 use std::cmp::Ordering;
 use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering as AtomicOrdering};
 
 /// Neighbor of a vertex in the graph
 #[derive(Debug, Clone, Copy)]
@@ -51,7 +52,7 @@ pub struct VamanaGraph {
     /// Number of vertices
     num_vertices: usize,
     /// Entry point for search
-    entry_point: usize,
+    entry_point: AtomicUsize,
     /// Distance calculator
     distance_fn: Box<dyn DistanceFunction>,
 }
@@ -72,7 +73,7 @@ impl VamanaGraph {
             search_list_size,
             alpha,
             num_vertices,
-            entry_point: 0,
+            entry_point: AtomicUsize::new(0),
             distance_fn: create_distance_function(metric, dimension),
         }
     }
@@ -84,7 +85,8 @@ impl VamanaGraph {
         }
         
         // Find medoid as entry point
-        self.entry_point = self.find_medoid(vectors)?;
+        let medoid = self.find_medoid(vectors)?;
+        self.entry_point.store(medoid, AtomicOrdering::Relaxed);
         
         // Build graph using Vamana algorithm
         for i in 0..self.num_vertices {
@@ -163,10 +165,11 @@ impl VamanaGraph {
         let mut w = BinaryHeap::new();
         
         // Start from entry point
-        let entry_dist = self.distance_fn.distance(query, &vectors[self.entry_point])?;
-        candidates.push(Neighbor { id: self.entry_point, distance: entry_dist });
-        w.push(Neighbor { id: self.entry_point, distance: entry_dist });
-        visited.insert(self.entry_point);
+        let entry = self.entry_point.load(AtomicOrdering::Relaxed);
+        let entry_dist = self.distance_fn.distance(query, &vectors[entry])?;
+        candidates.push(Neighbor { id: entry, distance: entry_dist });
+        w.push(Neighbor { id: entry, distance: entry_dist });
+        visited.insert(entry);
         
         while !candidates.is_empty() {
             let current = candidates.pop().unwrap();
@@ -295,6 +298,26 @@ impl VamanaGraph {
         Ok(results)
     }
     
+    /// Search for k nearest neighbors with Option vectors (for dynamic index)
+    pub fn search_dynamic(&self, query: &[f32], k: usize, vectors: &[Option<Vec<f32>>]) -> Result<Vec<(usize, f32)>> {
+        let neighbors = self.greedy_search_dynamic(query, k, vectors)?;
+        
+        // Calculate distances for results
+        let mut results = Vec::new();
+        for &id in &neighbors {
+            if let Some(vec) = &vectors[id] {
+                let dist = self.distance_fn.distance(query, vec)?;
+                results.push((id, dist));
+            }
+        }
+        
+        // Sort by distance
+        results.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
+        results.truncate(k);
+        
+        Ok(results)
+    }
+    
     /// Get graph statistics
     pub fn stats(&self) -> GraphStats {
         let graph = self.graph.read();
@@ -316,8 +339,248 @@ impl VamanaGraph {
             avg_degree: total_degree as f32 / self.num_vertices as f32,
             max_degree,
             min_degree,
-            entry_point: self.entry_point,
+            entry_point: self.entry_point.load(AtomicOrdering::Relaxed),
         }
+    }
+    
+    /// Insert a single vertex dynamically
+    pub fn insert_single(&self, vertex_id: usize, vertex: &[f32], vectors: &[Option<Vec<f32>>]) -> Result<()> {
+        // Ensure graph has capacity
+        {
+            let mut graph = self.graph.write();
+            if vertex_id >= graph.len() {
+                graph.resize(vertex_id + 1, Vec::new());
+            }
+        }
+        
+        // Search for nearest neighbors among existing vertices
+        let candidates = self.greedy_search_dynamic(vertex, self.search_list_size, vectors)?;
+        
+        // Add bidirectional edges
+        let mut graph = self.graph.write();
+        
+        for &neighbor_id in &candidates {
+            if neighbor_id != vertex_id {
+                // Add edge from vertex to neighbor
+                if !graph[vertex_id].contains(&neighbor_id) {
+                    graph[vertex_id].push(neighbor_id);
+                }
+                
+                // Add edge from neighbor to vertex (bidirectional)
+                if neighbor_id < graph.len() && !graph[neighbor_id].contains(&vertex_id) {
+                    graph[neighbor_id].push(vertex_id);
+                }
+            }
+        }
+        
+        drop(graph);
+        
+        // Prune neighbors of affected vertices
+        for &neighbor_id in &candidates {
+            self.prune_vertex_dynamic(neighbor_id, vectors)?;
+        }
+        
+        // Prune the new vertex
+        self.prune_vertex_dynamic(vertex_id, vectors)?;
+        
+        Ok(())
+    }
+    
+    /// Delete a vertex by removing all edges to/from it
+    pub fn delete_vertex(&self, vertex_id: usize) -> Result<()> {
+        let mut graph = self.graph.write();
+        
+        if vertex_id >= graph.len() {
+            return Ok(()); // Already deleted or never existed
+        }
+        
+        // Get neighbors before clearing
+        let neighbors = graph[vertex_id].clone();
+        
+        // Clear this vertex's edges
+        graph[vertex_id].clear();
+        
+        // Remove edges from neighbors to this vertex
+        for &neighbor_id in &neighbors {
+            if neighbor_id < graph.len() {
+                graph[neighbor_id].retain(|&id| id != vertex_id);
+            }
+        }
+        
+        // Update entry point if necessary
+        if vertex_id == self.entry_point.load(AtomicOrdering::Relaxed) {
+            // Find a new entry point among neighbors
+            for &neighbor_id in &neighbors {
+                if neighbor_id < graph.len() && !graph[neighbor_id].is_empty() {
+                    // This is a simple heuristic; in production, you might want to recalculate the medoid
+                    drop(graph);
+                    self.entry_point.store(neighbor_id, AtomicOrdering::Relaxed);
+                    return Ok(());
+                }
+            }
+        }
+        
+        Ok(())
+    }
+    
+    /// Set a new entry point
+    pub fn set_entry_point(&self, new_entry: usize) {
+        self.entry_point.store(new_entry, AtomicOrdering::Relaxed);
+    }
+    
+    /// Greedy search for dynamic index (handles Option<Vec<f32>>)
+    fn greedy_search_dynamic(&self, query: &[f32], k: usize, vectors: &[Option<Vec<f32>>]) -> Result<Vec<usize>> {
+        let mut visited = HashSet::new();
+        let mut candidates = BinaryHeap::new();
+        let mut w = BinaryHeap::new();
+        
+        // Find a valid entry point
+        let mut entry = self.entry_point.load(AtomicOrdering::Relaxed);
+        if entry >= vectors.len() || vectors[entry].is_none() {
+            // Find first valid vector
+            for (i, v) in vectors.iter().enumerate() {
+                if v.is_some() {
+                    entry = i;
+                    break;
+                }
+            }
+        }
+        
+        if entry >= vectors.len() || vectors[entry].is_none() {
+            return Ok(vec![]); // No valid vectors
+        }
+        
+        // Start from entry point
+        let entry_dist = self.distance_fn.distance(query, vectors[entry].as_ref().unwrap())?;
+        candidates.push(Neighbor { id: entry, distance: entry_dist });
+        w.push(Neighbor { id: entry, distance: entry_dist });
+        visited.insert(entry);
+        
+        while !candidates.is_empty() {
+            let current = candidates.pop().unwrap();
+            
+            // Check termination condition
+            if current.distance > w.peek().unwrap().distance * self.alpha {
+                break;
+            }
+            
+            // Explore neighbors
+            let graph = self.graph.read();
+            let neighbors = if current.id < graph.len() {
+                graph[current.id].clone()
+            } else {
+                vec![]
+            };
+            drop(graph);
+            
+            for &neighbor_id in &neighbors {
+                if !visited.contains(&neighbor_id) && neighbor_id < vectors.len() {
+                    if let Some(neighbor_vec) = &vectors[neighbor_id] {
+                        visited.insert(neighbor_id);
+                        
+                        let dist = self.distance_fn.distance(query, neighbor_vec)?;
+                        let neighbor = Neighbor { id: neighbor_id, distance: dist };
+                        
+                        if dist < w.peek().unwrap().distance || w.len() < k {
+                            candidates.push(neighbor);
+                            w.push(neighbor);
+                            
+                            // Maintain size k
+                            if w.len() > k {
+                                w.pop();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Extract result
+        let mut result: Vec<usize> = w.into_iter().map(|n| n.id).collect();
+        result.truncate(k);
+        Ok(result)
+    }
+    
+    /// Prune vertex for dynamic index
+    fn prune_vertex_dynamic(&self, vertex_id: usize, vectors: &[Option<Vec<f32>>]) -> Result<()> {
+        if vertex_id >= vectors.len() || vectors[vertex_id].is_none() {
+            return Ok(());
+        }
+        
+        let graph = self.graph.read();
+        if vertex_id >= graph.len() {
+            return Ok(());
+        }
+        
+        let mut candidates: Vec<usize> = graph[vertex_id].clone();
+        drop(graph);
+        
+        if candidates.len() <= self.max_degree {
+            return Ok(());
+        }
+        
+        let vertex_vec = vectors[vertex_id].as_ref().unwrap();
+        
+        // Calculate distances to all candidates
+        let mut neighbors: Vec<Neighbor> = Vec::new();
+        for &id in &candidates {
+            if id < vectors.len() {
+                if let Some(neighbor_vec) = &vectors[id] {
+                    let dist = self.distance_fn.distance(vertex_vec, neighbor_vec)?;
+                    neighbors.push(Neighbor { id, distance: dist });
+                }
+            }
+        }
+        
+        // Sort by distance
+        neighbors.sort_by(|a, b| a.distance.partial_cmp(&b.distance).unwrap());
+        
+        // RobustPrune algorithm
+        let mut pruned = Vec::new();
+        let mut pruned_set = HashSet::new();
+        
+        for neighbor in neighbors {
+            if pruned.len() >= self.max_degree {
+                break;
+            }
+            
+            // Check if this neighbor is closer to vertex than to any selected neighbor
+            let mut should_prune = false;
+            
+            for &selected_id in &pruned {
+                if selected_id < vectors.len() {
+                    if let Some(selected_vec) = &vectors[selected_id] {
+                        if let Some(neighbor_vec) = &vectors[neighbor.id] {
+                            let dist_to_selected = self.distance_fn.distance(neighbor_vec, selected_vec)?;
+                            if dist_to_selected < neighbor.distance {
+                                should_prune = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if !should_prune {
+                pruned.push(neighbor.id);
+                pruned_set.insert(neighbor.id);
+            }
+        }
+        
+        // Update graph
+        let mut graph = self.graph.write();
+        if vertex_id < graph.len() {
+            graph[vertex_id] = pruned;
+            
+            // Remove reverse edges for pruned neighbors
+            for &id in &candidates {
+                if !pruned_set.contains(&id) && id < graph.len() {
+                    graph[id].retain(|&x| x != vertex_id);
+                }
+            }
+        }
+        
+        Ok(())
     }
 }
 

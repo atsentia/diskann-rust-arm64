@@ -5,6 +5,7 @@
 pub mod memory;
 pub mod disk;
 pub mod builder;
+pub mod dynamic;
 
 use crate::{Distance, Result};
 

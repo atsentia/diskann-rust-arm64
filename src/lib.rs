@@ -3,11 +3,7 @@
 //! This crate provides a pure Rust implementation of Microsoft's DiskANN algorithm,
 //! optimized for ARM64 processors with NEON SIMD instructions.
 
-#![cfg_attr(not(feature = "std"), no_std)]
 #![warn(missing_docs)]
-
-#[cfg(not(feature = "std"))]
-extern crate alloc;
 
 /// Distance calculation functions with SIMD optimizations
 pub mod distance;
