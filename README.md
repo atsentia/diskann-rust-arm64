@@ -2,14 +2,30 @@
 
 A high-performance, memory-safe implementation of Microsoft's DiskANN algorithm in pure Rust, with first-class support for ARM64 NEON SIMD instructions.
 
+## 🎯 Project Status
+
+### ✅ Phase 1 & 2 Complete (Core Functionality)
+- **Core Distance Functions**: L2, Cosine, Inner Product with SIMD optimizations
+- **Vamana Graph Algorithm**: Full implementation with RobustPrune
+- **Dynamic Operations**: Insert, delete, and consolidate with lazy deletion
+- **Multi-Type Support**: float32, float16, int8, uint8 vectors
+- **File Format Support**: fvecs, bvecs, ivecs, binary formats
+- **Label/Filter Support**: Efficient filtered search with inverted index
+- **Streaming Index**: Async updates with background worker thread
+
+### 🚧 In Progress
+- Fixing remaining compilation errors
+- Range search functionality (Phase 3)
+- Product Quantization implementation (Phase 4)
+
 ## Features
 
-- 🚀 **ARM64 NEON Optimizations**: 3-6x speedup on Apple Silicon and ARM servers
+- 🚀 **ARM64 NEON Optimizations**: 3.73x speedup on Apple Silicon and ARM servers
 - 🦀 **Pure Rust**: Memory-safe implementation with zero undefined behavior
-- 🔧 **Cross-Platform**: Supports ARM64, x86-64 (with AVX2/AVX512), and WebAssembly
+- 🔧 **Cross-Platform**: Supports ARM64, x86-64 (with AVX2/AVX512), and fallback
 - ⚡ **High Performance**: Matches or exceeds C++ implementation performance
-- 🔄 **Async I/O**: Efficient disk operations with Tokio
-- 🐍 **Python Bindings**: Drop-in replacement for the original Python API
+- 🔄 **Dynamic Updates**: Support for insertions, deletions, and consolidation
+- 🏷️ **Label Filtering**: Efficient filtered search with label support
 - 📦 **Modular Design**: Use only the components you need
 
 ## Architecture
@@ -50,23 +66,98 @@ Based on our C++ ARM64 NEON optimizations:
 
 ## Quick Start
 
-```rust
-use diskann::{Index, IndexBuilder, Distance};
+### Basic In-Memory Index
 
-// Build an index
+```rust
+use diskann::{IndexBuilder, Distance};
+
+// Build an index from vectors
+let vectors = vec![
+    vec![1.0, 0.0, 0.0],
+    vec![0.0, 1.0, 0.0],
+    vec![0.0, 0.0, 1.0],
+];
+
 let index = IndexBuilder::new()
-    .dimensions(128)
+    .dimensions(3)
     .metric(Distance::L2)
-    .max_degree(32)
-    .build_from_file("vectors.bin")?;
+    .max_degree(16)
+    .build_from_vectors(vectors)?;
 
 // Search for nearest neighbors
-let query = vec![0.1; 128];
-let results = index.search(&query, 10)?;
+let query = vec![0.9, 0.1, 0.0];
+let results = index.search(&query, 2)?;
 
 for (id, distance) in results {
-    println!("ID: {}, Distance: {}", id, distance);
+    println!("Vector {} at distance {}", id, distance);
 }
+```
+
+### Dynamic Index with Updates
+
+```rust
+use diskann::{DynamicIndex, Distance};
+
+// Create a dynamic index
+let index = DynamicIndex::new(
+    128,                    // dimension
+    Distance::L2,           // metric
+    32,                     // max_degree
+    50,                     // search_list_size
+    1.2,                    // alpha
+);
+
+// Insert vectors with labels
+let id1 = index.insert(vec![1.0; 128], vec![1, 2, 3])?;
+let id2 = index.insert(vec![2.0; 128], vec![2, 3, 4])?;
+
+// Delete a vector (lazy deletion)
+index.delete(id1)?;
+
+// Search (automatically excludes deleted vectors)
+let results = index.search(&vec![1.5; 128], 5)?;
+
+// Consolidate when fragmentation is high
+if index.stats().fragmentation > 0.2 {
+    index.consolidate()?;
+}
+```
+
+### Streaming Index for Continuous Updates
+
+```rust
+use diskann::StreamingIndex;
+
+// Create a streaming index for async operations
+let index = StreamingIndex::new(128, Distance::L2, 32, 50, 1.2);
+
+// Async operations run in background
+let id = index.insert_async(vector, labels).await?;
+index.delete_async(id).await?;
+
+// Search is immediate (not queued)
+let results = index.search(&query, 10)?;
+
+// Shutdown gracefully
+index.shutdown();
+```
+
+### Working with Different Data Types
+
+```rust
+use diskann::types::{VectorType, QuantizationParams};
+
+// Load int8 vectors
+let (vectors, dim) = diskann::formats::read_bvecs("int8_vectors.bvecs")?;
+
+// Convert between types with quantization
+let params = QuantizationParams::from_data(&vectors);
+let float_vectors = VectorType::Int8.convert_to_float(&vectors, &params);
+
+// Build index with converted vectors
+let index = IndexBuilder::new()
+    .dimensions(dim)
+    .build_from_vectors(float_vectors)?;
 ```
 
 ## Building from Source

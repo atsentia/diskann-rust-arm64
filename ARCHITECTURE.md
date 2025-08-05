@@ -1,6 +1,32 @@
 # DiskANN Rust Architecture
 
-## SIMD Strategy
+This document describes the architecture of the pure Rust DiskANN implementation.
+
+## Project Structure
+
+```
+diskann/
+├── src/
+│   ├── distance/        # SIMD-optimized distance calculations
+│   ├── graph/          # Vamana graph algorithm
+│   ├── index/          # Index implementations (memory, dynamic, disk)
+│   ├── labels/         # Label and filter support
+│   ├── types/          # Multi-type vector support
+│   ├── formats/        # File I/O for various formats
+│   ├── io/             # Async I/O and caching
+│   ├── pq/             # Product Quantization (in progress)
+│   └── utils/          # Utilities and helpers
+├── benches/            # Criterion benchmarks
+├── tests/              # Integration tests
+└── examples/           # Usage examples
+```
+
+## Core Components
+
+### 1. Distance Functions (`src/distance/`)
+The foundation of similarity search, optimized for different platforms.
+
+#### SIMD Strategy
 
 This implementation uses a multi-tier approach for SIMD optimizations:
 
@@ -72,3 +98,135 @@ All SIMD implementations are tested against the scalar implementation:
 - Exact match for integer operations
 - Floating-point operations tested with epsilon tolerance
 - Edge cases: empty vectors, single element, non-SIMD-aligned sizes
+
+### 2. Graph Structure (`src/graph/`)
+
+The core Vamana graph algorithm for approximate nearest neighbor search.
+
+#### VamanaGraph
+- **Adjacency List**: Each vertex stores its neighbors
+- **Bidirectional Edges**: All edges are bidirectional for robustness
+- **Entry Point**: Medoid-based entry point selection
+- **Thread Safety**: Uses `Arc<RwLock<>>` for concurrent access
+
+#### Key Algorithms
+- **RobustPrune**: Diverse neighbor selection for better recall
+- **Greedy Search**: Beam search with early termination
+- **Dynamic Updates**: Support for insert/delete operations
+
+### 3. Index Types (`src/index/`)
+
+#### MemoryIndex
+- In-memory storage of vectors and graph
+- Optimized for small to medium datasets (<10M vectors)
+- Fast search with no I/O overhead
+
+#### DynamicIndex
+- Supports insert, delete, and consolidate operations
+- Lazy deletion with periodic consolidation
+- Thread-safe with fine-grained locking
+- Automatic fragmentation management
+
+#### StreamingIndex
+- Async operations with background worker
+- Non-blocking insert/delete operations
+- Immediate search capability
+
+### 4. Type System (`src/types/`)
+
+Supports multiple vector types with transparent conversion:
+- **float32**: Standard 32-bit floating point
+- **float16**: Half precision for memory efficiency
+- **int8**: Quantized vectors for compression
+- **uint8**: Unsigned quantized vectors
+
+### 5. Label System (`src/labels/`)
+
+Efficient filtered search with label support:
+- **LabelSet**: Compact representation of labels per vector
+- **LabelIndex**: Inverted index for fast label queries
+- **Universal Label**: Special label (0) that matches all queries
+
+### 6. I/O System (`src/io/`)
+
+#### Memory-Mapped Files
+- Zero-copy access to large datasets
+- Efficient random access patterns
+- Platform-optimized caching
+
+#### Async I/O
+- Tokio-based async file operations
+- Prefetching for sequential access
+- LRU cache for repeated reads
+
+### 7. File Formats (`src/formats/`)
+
+Support for common vector file formats:
+- **fvecs**: Float vectors (LittleEndian)
+- **bvecs**: Byte vectors (int8/uint8)
+- **ivecs**: Integer vectors
+- **binary**: Custom binary format with metadata
+
+## Design Principles
+
+### 1. Safety First
+- No unsafe code except for SIMD intrinsics
+- All unsafe blocks are documented and tested
+- Memory safety guaranteed by Rust's type system
+
+### 2. Performance
+- Zero-cost abstractions where possible
+- SIMD optimization for all distance calculations
+- Cache-friendly data structures
+- Minimal allocations in hot paths
+
+### 3. Modularity
+- Each component is independently testable
+- Clear interfaces between modules
+- Feature flags for optional components
+
+### 4. Compatibility
+- File format compatibility with C++ DiskANN
+- API compatibility with existing wrappers
+- Cross-platform support
+
+## Concurrency Model
+
+### Read-Heavy Optimization
+- Multiple readers, single writer pattern
+- RwLock for graph structure
+- Lock-free reads where possible
+
+### Dynamic Operations
+- Fine-grained locking for updates
+- Lazy deletion to minimize contention
+- Background consolidation thread
+
+## Memory Management
+
+### Vector Storage
+- Contiguous storage for cache efficiency
+- Optional memory mapping for large datasets
+- Aligned allocation for SIMD operations
+
+### Graph Storage
+- Adjacency list with fixed maximum degree
+- Compact representation (4 bytes per edge)
+- Optional compression for large graphs
+
+## Future Enhancements
+
+### Product Quantization
+- 8x-32x compression ratios
+- SIMD-optimized distance calculations
+- Hierarchical quantization for better recall
+
+### Disk-Based Index
+- Streaming graph construction
+- Compressed graph format
+- SSD-optimized layout
+
+### GPU Acceleration
+- CUDA/Metal compute shaders
+- Batch distance calculations
+- Parallel graph construction
