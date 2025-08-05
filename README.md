@@ -222,6 +222,29 @@ cargo build --release --all-features
 - ✅ Disk-Based Indexing: Handle datasets larger than RAM
 - ✅ Label Filtering: Efficient filtered search
 
+### 🚀 Ampere ARM64 Benchmark Results (2025-08-05) - **NEW!**
+
+**Platform**: Linux aarch64 6.8.0-60-generic (Ampere Server)
+
+**SIMD Distance Functions (ARM64 NEON):**
+- L2 Distance: **48.6M ops/sec** (64D) → **4.4M ops/sec** (1024D)
+- Inner Product: **69.6M ops/sec** peak performance (64D) 
+- Cosine Distance: **23.4M ops/sec** (64D) → **1.9M ops/sec** (1024D)
+- **Performance Profile**: Strong NEON acceleration confirmed
+
+**Key Findings:**
+- ✅ **Successful Deployment** on Ampere ARM64 server architecture
+- ✅ **NEON Optimizations Active** - All SIMD functions working
+- ✅ **Competitive Performance** - Comparable to M2 with different profile
+- ✅ **Platform Stability** - All core examples running successfully
+- 📊 **Results Location**: `examples/runs/ampereARM64small/`
+
+**Performance Comparison (Ampere vs M2):**
+- L2 Distance (64D): 48.6M vs 88.8M ops/sec (M2 55% faster)
+- Inner Product (64D): 69.6M vs 134.1M ops/sec (M2 93% faster)  
+- L2 Distance (1024D): 4.4M vs 4.0M ops/sec (Ampere 10% faster)
+- **Architecture Notes**: M2 shows higher peak rates, Ampere maintains better scaling
+
 ### GPU Performance (NVIDIA RTX 4090)
 - Batch size 1000: **45x speedup**
 - Batch size 10000: **87x speedup**
