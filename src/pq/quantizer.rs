@@ -5,7 +5,6 @@
 
 use crate::{Result, Distance};
 use crate::pq::kmeans::{KMeans, KMeansParams};
-use crate::utils::aligned::AlignedVec;
 
 /// Product Quantization parameters
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]

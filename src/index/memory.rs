@@ -6,7 +6,6 @@ use crate::{Distance, Index, Result};
 use crate::graph::VamanaGraph;
 use crate::graph::vamana::SerializableVamanaGraph;
 use std::sync::Arc;
-use std::sync::atomic::Ordering as AtomicOrdering;
 use std::path::Path;
 use std::fs::File;
 use std::io::{BufReader, BufWriter};

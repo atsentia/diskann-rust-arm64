@@ -5,8 +5,7 @@
 
 use crate::{Distance, Result, Error};
 use crate::graph::VamanaGraph;
-use crate::distance::create_distance_function;
-use crate::labels::{LabelSet, LabelIndex};
+use crate::labels::LabelIndex;
 use parking_lot::RwLock;
 use std::sync::Arc;
 use hashbrown::{HashSet, HashMap};

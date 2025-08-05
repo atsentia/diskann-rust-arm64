@@ -5,7 +5,6 @@
 
 use crate::{Result, DistanceFunction};
 use crate::distance::create_distance_function;
-use crate::utils::aligned::AlignedVec;
 use rand::prelude::*;
 use std::f32;
 

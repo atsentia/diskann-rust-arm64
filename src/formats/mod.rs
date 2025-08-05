@@ -6,7 +6,7 @@
 use crate::{Result, Error};
 use crate::types::{VectorType, VectorElement};
 use std::fs::File;
-use std::io::{Read, Write, Seek, SeekFrom, BufReader, BufWriter};
+use std::io::{Read, Write, BufReader, BufWriter};
 use std::path::Path;
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 

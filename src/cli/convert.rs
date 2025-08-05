@@ -5,11 +5,9 @@
 
 use clap::Args;
 use console::style;
-use indicatif::{ProgressBar, ProgressStyle};
 use std::path::PathBuf;
 
-use crate::*;
-use crate::types::{VectorType, QuantizationParams};
+use crate::types::QuantizationParams;
 
 #[derive(Args)]
 pub struct ConvertArgs {

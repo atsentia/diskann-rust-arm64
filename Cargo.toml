@@ -18,13 +18,13 @@ sse42 = []  # x86-64 SSE4.2 support (broad compatibility)
 fma4 = []  # AMD FMA4 support (Bulldozer/Piledriver)
 sve = []  # ARM64 SVE support (future)
 amx = []  # Intel AMX support (future)
-webgpu = ["wgpu", "bytemuck"]  # Cross-platform GPU support
-cuda = ["cudarc"]  # NVIDIA CUDA support
-rocm = ["hip"]  # AMD ROCm support
-metal = ["metal"]  # Apple Metal support
-opencl = ["opencl3"]  # OpenCL support
-parallel = ["rayon", "num_cpus"]
-python = ["pyo3"]
+webgpu = ["dep:wgpu"]  # Cross-platform GPU support
+cuda = ["dep:cudarc"]  # NVIDIA CUDA support
+rocm = []  # AMD ROCm support (stub implementation)
+metal = ["dep:metal"]  # Apple Metal support
+opencl = ["dep:opencl3"]  # OpenCL support
+parallel = ["dep:rayon", "dep:num_cpus"]
+python = ["dep:pyo3"]
 c-api = []
 
 [dependencies]
@@ -36,7 +36,7 @@ env_logger = "0.11"
 
 # Math and SIMD
 num-traits = "0.2"
-bytemuck = "1.14"
+bytemuck = { version = "1.14", features = ["derive"] }
 half = "2.3"
 packed_simd_2 = { version = "0.3", optional = true }
 wide = "0.7"  # Pure Rust SIMD abstractions
@@ -60,10 +60,10 @@ ordered-float = "4.2"
 hashbrown = "0.14"
 
 # GPU and accelerated computing
-wgpu = { version = "0.18", optional = true } # Cross-platform GPU compute
-bytemuck = { version = "1.14", features = ["derive"], optional = true }
+wgpu = { version = "0.19", optional = true } # Cross-platform GPU compute
 cudarc = { version = "0.9", optional = true } # NVIDIA CUDA
-hip = { version = "0.3", optional = true } # AMD ROCm
+# Note: ROCm support would use rocm-rs or hip-sys, but they're early stage
+# For now, we'll use stub implementation for ROCm
 metal = { version = "0.27", optional = true } # Apple Metal
 opencl3 = { version = "0.9", optional = true } # OpenCL
 

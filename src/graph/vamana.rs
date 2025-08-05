@@ -269,8 +269,8 @@ impl VamanaGraph {
             let mut should_prune = false;
             
             for &selected_id in &pruned {
-                let neighbor_vec: &[f32] = &vectors[neighbor.id];
-                let selected_vec: &[f32] = &vectors[selected_id];
+                let neighbor_vec = vectors[neighbor.id].as_slice();
+                let selected_vec = vectors[selected_id].as_slice();
                 let dist_to_selected = self.distance_fn.distance(neighbor_vec, selected_vec)?;
                 if dist_to_selected < neighbor.distance {
                     should_prune = true;

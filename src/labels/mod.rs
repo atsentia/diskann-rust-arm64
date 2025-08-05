@@ -2,7 +2,7 @@
 //!
 //! This module provides label-based filtering capabilities for search operations.
 
-use crate::{Result, Error};
+use crate::Result;
 use hashbrown::{HashMap, HashSet};
 
 /// Label type (32-bit for compatibility with C++)

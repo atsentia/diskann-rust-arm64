@@ -3,9 +3,7 @@
 //! This module provides support for different data types including
 //! int8, uint8, float16, and float32.
 
-use crate::{Result, Error};
 use half::f16;
-use num_traits::{Float, FromPrimitive, ToPrimitive};
 use std::fmt::Debug;
 use serde::{Deserialize, Serialize};
 
