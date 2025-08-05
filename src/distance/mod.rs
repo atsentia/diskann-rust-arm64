@@ -14,6 +14,9 @@ pub mod avx2;
 #[cfg(all(target_arch = "x86_64", feature = "avx512"))]
 pub mod avx512;
 
+/// Portable SIMD implementations using pure Rust
+pub mod simd;
+
 /// Scalar (non-SIMD) implementations as fallback
 pub mod scalar;
 
@@ -70,8 +73,8 @@ pub fn create_distance_function(metric: Distance, dimension: usize) -> Box<dyn D
         }
     }
     
-    // Fallback to scalar implementation
-    Box::new(scalar::ScalarDistance::new(metric, dimension))
+    // Use portable SIMD implementation as default before scalar
+    Box::new(simd::SimdDistance::new(metric, dimension))
 }
 
 /// Alignment requirements for SIMD operations

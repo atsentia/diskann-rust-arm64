@@ -29,6 +29,8 @@ env_logger = "0.11"
 num-traits = "0.2"
 bytemuck = "1.14"
 half = "2.3"
+packed_simd_2 = { version = "0.3", optional = true }
+wide = "0.7"  # Pure Rust SIMD abstractions
 
 # Parallelism
 rayon = { version = "1.8", optional = true }

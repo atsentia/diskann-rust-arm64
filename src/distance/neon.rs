@@ -4,6 +4,8 @@
 //! optimized for ARM64 processors with NEON support.
 
 use crate::{Distance, DistanceFunction, Result, Error};
+
+#[cfg(target_arch = "aarch64")]
 use std::arch::aarch64::*;
 
 /// NEON-optimized distance calculator
@@ -19,6 +21,7 @@ impl NeonDistance {
     }
     
     /// NEON-optimized L2 distance calculation
+    #[cfg(target_arch = "aarch64")]
     #[target_feature(enable = "neon")]
     #[inline]
     unsafe fn l2_distance_neon(a: &[f32], b: &[f32]) -> f32 {
