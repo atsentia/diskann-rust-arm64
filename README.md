@@ -4,7 +4,7 @@ A high-performance, memory-safe implementation of Microsoft's DiskANN algorithm 
 
 ## 🎯 Project Status
 
-### ✅ Phase 1-3 Complete (Production Ready)
+### ✅ Phase 1-4 Complete (Production Ready)
 - **Core Distance Functions**: L2, Cosine, Inner Product with SIMD optimizations
 - **Vamana Graph Algorithm**: Full implementation with RobustPrune
 - **Dynamic Operations**: Insert, delete, and consolidate with lazy deletion
@@ -13,10 +13,10 @@ A high-performance, memory-safe implementation of Microsoft's DiskANN algorithm 
 - **Label/Filter Support**: Efficient filtered search with inverted index
 - **Range Search**: Find all neighbors within distance threshold
 - **Filtered Search**: Complex label-based filtering with multiple strategies
+- **Product Quantization**: Memory-efficient storage with up to 64x compression
 - **Advanced I/O**: Memory-mapped files and async operations
 
 ### 🚧 Next Phase (Optional Advanced Features)
-- Product Quantization implementation (Phase 4)
 - Command-line tools and REST API (Phase 5-6)
 - Stitched/sharded indices for massive scale
 
@@ -28,6 +28,7 @@ A high-performance, memory-safe implementation of Microsoft's DiskANN algorithm 
 - ⚡ **High Performance**: Matches or exceeds C++ implementation performance
 - 🔄 **Dynamic Updates**: Support for insertions, deletions, and consolidation
 - 🏷️ **Label Filtering**: Efficient filtered search with label support
+- 🗜️ **Product Quantization**: Up to 64x memory compression with configurable quality
 - 📦 **Modular Design**: Use only the components you need
 
 ## Architecture
@@ -49,9 +50,16 @@ This implementation is designed to be integrated with the existing Rust wrapper 
 3. **Index Types** (`src/index/`)
    - In-memory index for small datasets
    - Disk-based index for billion-scale search
-   - Compressed indices with Product Quantization
+   - Dynamic index with insert/delete operations
+   - PQ-compressed indices for memory efficiency
 
-4. **I/O System** (`src/io/`)
+4. **Product Quantization** (`src/pq/`)
+   - K-means clustering with K-means++ initialization
+   - Configurable compression ratios (up to 64x)
+   - Asymmetric distance for improved query accuracy
+   - Memory-efficient index implementation
+
+5. **I/O System** (`src/io/`)
    - Async file operations
    - Memory-mapped files
    - Efficient caching strategies
@@ -193,6 +201,37 @@ for neighbor in results {
     println!("Vector {} (labels: {:?}) at distance {}", 
              neighbor.id, neighbor.labels, neighbor.distance);
 }
+```
+
+### Product Quantization for Memory Efficiency
+
+```rust
+use diskann::pq::{ProductQuantizer, PQParams, PQIndex};
+
+// Configure PQ parameters
+let pq_params = PQParams::new(
+    8,   // 8 subspaces
+    8,   // 8 bits per subquantizer (256 centroids)
+);
+
+// Train quantizer on your dataset
+let mut pq = ProductQuantizer::new(pq_params.clone(), 128)?;
+pq.train(&training_vectors)?;
+
+// Encode vectors for storage
+let encoded = pq.encode_batch(&vectors)?;
+
+// Create PQ-based index for efficient search
+let mut pq_index = PQIndex::new(pq_params, 128, Distance::L2)?;
+pq_index.build(vectors)?;
+
+// Search with memory-efficient storage
+let results = pq_index.search(&query, 10)?;
+
+// Get compression statistics
+let stats = pq_index.memory_stats();
+println!("Compression ratio: {:.1}x", stats.compression_ratio);
+println!("Memory usage: {} KB", stats.total_memory_bytes / 1024);
 ```
 
 ### Working with Different Data Types
