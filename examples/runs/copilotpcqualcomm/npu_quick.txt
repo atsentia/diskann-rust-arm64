@@ -1,0 +1,47 @@
+DiskANN NPU/SIMD Quick Benchmark
+Comparing acceleration methods - completes in <60 seconds
+
+=== System Information ===
+Platform: windows
+Architecture: aarch64
+CPU: 12 cores
+Device: Qualcomm Snapdragon X (ARM64)
+SIMD: ARM64 NEON
+NPU: Not Available (Windows ML integration pending)
+────────────────────────────────────────────────────────────
+
+=== Benchmark Configuration ===
+Dimensions: [128, 768, 1536]
+Batch sizes: [1, 32, 128]
+Iterations per test: 10000
+────────────────────────────────────────────────────────────
+
+=== Distance Computation Performance ===
+Dimension  Batch      Time/Op (μs)    GFLOPS          Implementation      
+──────────────────────────────────────────────────────────────────────
+128        1          0.03            14.80           ARM64 NEON          
+128        32         0.03            15.01           ARM64 NEON          
+128        128        0.03            13.90           ARM64 NEON (NPU candidate)
+
+768        1          0.22            10.69           ARM64 NEON          
+768        32         0.22            10.57           ARM64 NEON          
+768        128        0.22            10.53           ARM64 NEON (NPU candidate)
+
+1536       1          0.50            9.22            ARM64 NEON          
+1536       32         0.73            6.28            ARM64 NEON          
+1536       128        0.82            5.64            ARM64 NEON (NPU candidate)
+
+
+=== Projected NPU Performance ===
+Based on typical NPU characteristics:
+• Large batch (128+): 5-10x speedup expected
+• Power efficiency: 10-20x better GFLOPS/Watt
+• Best for: Batch inference, repeated operations
+• Overhead: High for single operations
+
+=== Current Status ===
+✗ NPU: Windows ML integration not yet implemented
+✓ CPU: ARM64 NEON SIMD fully operational
+✓ Performance: Already achieving good results with NEON
+
+✓ Quick benchmark completed

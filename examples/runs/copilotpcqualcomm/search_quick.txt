@@ -1,0 +1,47 @@
+DiskANN Quick Search Benchmark
+Lightweight benchmark - completes in <60 seconds
+
+=== System Information ===
+Platform: windows
+Architecture: aarch64
+CPU: 12 cores
+Device: Qualcomm Snapdragon X (ARM64)
+────────────────────────────────────────────────────────────
+
+=== Benchmark Configuration ===
+Dataset size: 5000 vectors
+Query count: 100
+Dimensions: [128, 768]
+K values: [10, 50]
+────────────────────────────────────────────────────────────
+
+=== Dimension: 128 ===
+Generating 5000 vectors...
+Building index...
+Index built in 823.7936ms
+
+K     Avg (μs)        P50 (μs)        P90 (μs)        P99 (μs)       
+─────────────────────────────────────────────────────────────────
+10    27.0            13.0            81.0            271.0          
+50    30.0            30.0            36.0            52.0           
+
+► Throughput Test (1 second):
+  Queries per second: 36609
+  Average latency: 27.32 μs
+
+=== Dimension: 768 ===
+Generating 5000 vectors...
+Building index...
+Index built in 6.3275163s
+
+K     Avg (μs)        P50 (μs)        P90 (μs)        P99 (μs)       
+─────────────────────────────────────────────────────────────────
+10    144.0           71.0            445.0           1043.0         
+50    185.0           128.0           340.0           689.0          
+
+► Throughput Test (1 second):
+  Queries per second: 6745
+  Average latency: 148.26 μs
+
+✓ Quick benchmark completed
+Total runtime: 2009

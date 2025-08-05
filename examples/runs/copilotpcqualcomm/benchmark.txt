@@ -1,0 +1,93 @@
+DiskANN Rust Benchmark - Following Best Practices
+
+Configuration:
+  Dimension: 768
+  Vectors: 10000
+  Queries: 1000
+  K: 10
+
+Generating test data...
+Data generation took: 86.7024ms
+
+=== Index Build Benchmark ===
+Index Build Statistics:
+  Count: 5
+  Mean: 31.26845324s
+  Min: 30.0214718s
+  Max: 32.7503534s
+  P50: 31.5858428s
+  P90: 32.7503534s
+  P99: 32.7503534s
+  QPS: 0
+Build rate: 320 points/sec
+
+=== Search Benchmark ===
+Individual Search Statistics:
+  Count: 100
+  Mean: 317.345µs
+  Min: 107.5µs
+  Max: 1.2805ms
+  P50: 240.3µs
+  P90: 549.7µs
+  P99: 1.2805ms
+  QPS: 3151
+
+=== Throughput Measurement ===
+Search Throughput: 3352 ops/sec
+
+=== Batch Search Benchmark ===
+Batch Size 1 Statistics:
+  Count: 100
+  Mean: 241.072µs
+  Min: 121.4µs
+  Max: 431.1µs
+  P50: 256.6µs
+  P90: 261.3µs
+  P99: 431.1µs
+  QPS: 4148
+  Effective QPS: 4148
+Batch Size 10 Statistics:
+  Count: 100
+  Mean: 2.37184ms
+  Min: 1.1354ms
+  Max: 3.2836ms
+  P50: 2.5552ms
+  P90: 2.5794ms
+  P99: 3.2836ms
+  QPS: 422
+  Effective QPS: 4216
+Batch Size 100 Statistics:
+  Count: 100
+  Mean: 28.303786ms
+  Min: 16.0926ms
+  Max: 32.5637ms
+  P50: 29.0672ms
+  P90: 30.8878ms
+  P99: 32.5637ms
+  QPS: 35
+  Effective QPS: 3533
+
+=== Memory Usage ===
+  Vectors: 29.30 MB
+  Graph (estimated): 2.44 MB
+  Total (estimated): 31.74 MB
+  Per vector: 3.25 KB
+
+=== Distance Function Micro-benchmark ===
+L2 Distance Statistics:
+  Count: 100000
+  Mean: 679ns
+  Min: 200ns
+  Max: 679.7µs
+  P50: 700ns
+  P90: 800ns
+  P99: 800ns
+  QPS: 1472754
+  Operations/sec: 1472754
+  Nanoseconds/op: 679
+
+=== Platform Capabilities ===
+  ARM64 NEON: ✓
+  x86-64 AVX2: ✗
+  Target: ARM64
+  SIMD: NEON enabled

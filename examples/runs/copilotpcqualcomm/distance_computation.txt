@@ -1,0 +1,41 @@
+DiskANN Distance Computation Benchmark
+Testing L2 distance performance across dimensions
+
+=== System Information ===
+Platform: windows
+Architecture: aarch64
+CPU: 12 cores
+Device: Qualcomm Snapdragon X (ARM64)
+NPU Status: ✗ Not Available
+SIMD: ARM64 NEON
+────────────────────────────────────────────────────────────
+
+=== Benchmark Configuration ===
+Distance metric: L2 (Euclidean)
+Iterations per dimension: 100000
+Dimensions to test: [128, 256, 512, 768, 1024, 1536]
+────────────────────────────────────────────────────────────
+
+Generating test vectors...
+
+=== Running Benchmarks ===
+Dimension  Time/Op (ns)    Ops/Second      GB/s            Implementation      
+────────────────────────────────────────────────────────────────────────────────
+128        33.52           29831156        30.55           ARM64 NEON          
+256        82.38           12139163        24.86           ARM64 NEON          
+512        178.69          5596253         22.92           ARM64 NEON          
+768        225.28          4438920         27.27           ARM64 NEON          
+1024       244.91          4083066         33.45           ARM64 NEON          
+1536       398.77          2507736         30.82           ARM64 NEON          
+
+=== Comparison with Scalar Implementation ===
+Dimension  Scalar (ns)     SIMD Speedup   
+────────────────────────────────────────
+128        63.45           3.37           x
+256        122.71          2.65           x
+512        240.98          2.43           x
+768        369.47          2.19           x
+1024       479.74          1.97           x
+1536       740.90          1.88           x
+
+✓ Benchmark completed successfully
