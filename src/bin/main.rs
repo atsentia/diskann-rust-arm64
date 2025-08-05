@@ -14,7 +14,7 @@ use diskann::cli::{build, search, benchmark, convert, info};
 #[command(about = "DiskANN Rust - High-performance vector search")]
 #[command(version = env!("CARGO_PKG_VERSION"))]
 #[command(author = "DiskANN Rust Contributors")]
-pub struct Cli {
+pub struct CliApp {
     #[command(subcommand)]
     pub command: Commands,
     
@@ -46,7 +46,13 @@ pub enum Commands {
 }
 
 fn main() -> diskann::Result<()> {
-    let cli = Cli::parse();
+    let cli_app = CliApp::parse();
+    
+    // Create the library's Cli struct
+    let cli = diskann::Cli {
+        verbose: cli_app.verbose,
+        no_progress: cli_app.no_progress,
+    };
     
     // Initialize logging based on verbosity
     if cli.verbose {
@@ -67,7 +73,7 @@ fn main() -> diskann::Result<()> {
     }
     
     // Execute command
-    match cli.command {
+    match cli_app.command {
         Commands::Build(args) => build::run(args, &cli),
         Commands::Search(args) => search::run(args, &cli),
         Commands::Benchmark(args) => benchmark::run(args, &cli),

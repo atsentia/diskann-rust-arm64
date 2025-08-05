@@ -46,7 +46,7 @@ pub struct Cli {
 }
 
 // Re-export commonly used types
-pub use distance::{Distance, DistanceFunction};
+pub use distance::{Distance, DistanceFunction, create_distance_function};
 pub use index::{Index, IndexBuilder};
 
 /// Result type for DiskANN operations

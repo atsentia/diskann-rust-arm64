@@ -8,7 +8,6 @@ use console::style;
 use std::path::PathBuf;
 use hashbrown::HashMap;
 
-use crate::*;
 
 #[derive(Args)]
 pub struct InfoArgs {

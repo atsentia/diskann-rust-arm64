@@ -74,7 +74,7 @@ pub trait DistanceFunction: Send + Sync {
     fn batch_distance(&self, query: &[f32], points: &[f32], distances: &mut [f32]) -> Result<()>;
     
     /// Calculate distance from query to a specific vector ID (for graph search)
-    fn distance_to_query(&self, query: &[f32], target_id: usize) -> Result<f32> {
+    fn distance_to_query(&self, _query: &[f32], _target_id: usize) -> Result<f32> {
         // Default implementation - subclasses can override for specialized behavior
         Err(anyhow::anyhow!("distance_to_query not implemented for this distance function"))
     }

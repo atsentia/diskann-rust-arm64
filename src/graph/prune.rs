@@ -39,7 +39,7 @@ where
     let mut pruned = Vec::with_capacity(max_degree);
     let mut pruned_set = HashSet::new();
     
-    for (candidate_id, candidate_dist) in neighbors {
+    for &(candidate_id, candidate_dist) in &neighbors {
         if pruned.len() >= max_degree {
             break;
         }
@@ -48,9 +48,10 @@ where
         let mut should_prune = false;
         
         for &selected_id in &pruned {
-            let candidate_vec: &[f32] = &vectors[candidate_id];
-            let selected_vec: &[f32] = &vectors[selected_id];
-            let dist_to_selected = distance_fn(candidate_vec, selected_vec)?;
+            let dist_to_selected = distance_fn(
+                vectors[candidate_id].as_slice(), 
+                vectors.get(selected_id).map(|v: &Vec<f32>| v.as_slice()).unwrap()
+            )?;
             
             // Prune if candidate is closer to a selected neighbor than to vertex
             if dist_to_selected < candidate_dist * alpha {
@@ -67,7 +68,7 @@ where
     
     // If we pruned too aggressively, add back some neighbors
     if pruned.len() < max_degree / 2 {
-        for (id, _) in neighbors {
+        for &(id, _) in &neighbors {
             if !pruned_set.contains(&id) && pruned.len() < max_degree {
                 pruned.push(id);
                 pruned_set.insert(id);
@@ -85,7 +86,7 @@ pub fn prune_with_connectivity<F>(
     vectors: &[Vec<f32>],
     max_degree: usize,
     alpha: f32,
-    distance_fn: F,
+    mut distance_fn: F,
 ) -> Result<()>
 where
     F: FnMut(&[f32], &[f32]) -> Result<f32>,

@@ -156,7 +156,7 @@ fn test_large_scale_index() {
         total_search_time += start.elapsed();
     }
     
-    let avg_search_time = total_search_time / num_queries;
+    let avg_search_time = total_search_time / num_queries as u32;
     let qps = 1_000_000.0 / avg_search_time.as_micros() as f64;
     
     println!("Average search time: {:?}", avg_search_time);

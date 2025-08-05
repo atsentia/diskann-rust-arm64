@@ -234,7 +234,7 @@ impl VamanaGraph {
     /// Prune edges for a vertex using RobustPrune algorithm
     fn prune_vertex(&self, vertex_id: usize, vectors: &[Vec<f32>]) -> Result<()> {
         let graph = self.graph.read();
-        let mut candidates: Vec<usize> = graph[vertex_id].clone();
+        let candidates: Vec<usize> = graph[vertex_id].clone();
         drop(graph);
         
         if candidates.len() <= self.max_degree {
@@ -269,9 +269,10 @@ impl VamanaGraph {
             let mut should_prune = false;
             
             for &selected_id in &pruned {
-                let neighbor_vec: &[f32] = &vectors[neighbor.id];
-                let selected_vec: &[f32] = &vectors[selected_id];
-                let dist_to_selected = self.distance_fn.distance(neighbor_vec, selected_vec)?;
+                let dist_to_selected = self.distance_fn.distance(
+                    vectors[neighbor.id].as_slice(), 
+                    vectors.get(selected_id).map(|v: &Vec<f32>| v.as_slice()).unwrap()
+                )?;
                 if dist_to_selected < neighbor.distance {
                     should_prune = true;
                     break;
@@ -570,7 +571,7 @@ impl VamanaGraph {
             return Ok(());
         }
         
-        let mut candidates: Vec<usize> = graph[vertex_id].clone();
+        let candidates: Vec<usize> = graph[vertex_id].clone();
         drop(graph);
         
         if candidates.len() <= self.max_degree {
