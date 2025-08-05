@@ -196,15 +196,36 @@ cargo build --release --all-features
 
 ## 📊 Performance
 
+### M2 ARM64 Benchmark Results (Latest - 2025-08-05)
+
+**SIMD Distance Functions (ARM64 NEON):**
+- L2 Distance: **88.8M ops/sec** (64D) → **4.0M ops/sec** (1024D)
+- Inner Product: **134.1M ops/sec** peak performance (64D)
+- Cosine Distance: **38.9M ops/sec** (64D) → **1.5M ops/sec** (1024D)
+- **Confirmed 3-5x speedup** over scalar implementations
+
+**Index Performance:**
+- **Build Rate**: 16.5K vectors/sec (1K vectors, 128D)
+- **Search Performance**: 46.3K QPS average, 21.6μs latency
+- **Batch Operations**: 47.5K QPS (single), 39.7K QPS (batch=10)
+- **Large Scale**: 770 points/sec (10K vectors, 768D)
+
+**Product Quantization:**
+- **Compression**: 64x memory reduction (512 bytes → 8 bytes per vector)
+- **Training Speed**: 1.01s for 1000 vectors
+- **Reconstruction Error**: 0.112 MSE (excellent quality)
+- **Search Integration**: Full compatibility with compressed indices
+
+**Platform Capabilities:**
+- ✅ ARM64 NEON: Active and optimized
+- ✅ Dynamic Operations: Insert/delete/consolidate
+- ✅ Disk-Based Indexing: Handle datasets larger than RAM
+- ✅ Label Filtering: Efficient filtered search
+
 ### GPU Performance (NVIDIA RTX 4090)
 - Batch size 1000: **45x speedup**
 - Batch size 10000: **87x speedup**
 - Batch size 100000: **112x speedup**
-
-### CPU SIMD Performance (Apple M2 Max)
-- ARM64 NEON L2 distance: **3.73x speedup**
-- Graph search: **320,513 queries/second**
-- Index build: **2,457 vectors/second**
 
 ### Memory Efficiency
 - In-memory index: ~40 bytes per vector

@@ -1,0 +1,55 @@
+DiskANN Rust Benchmark Results Summary - M2 ARM64
+==================================================
+Date: 2025-08-05 14:55:24
+
+COMPLETED BENCHMARKS:
+=====================
+
+1. SIMD Performance Benchmark ✅
+   - ARM64 NEON: Confirmed working
+   - L2 Distance: 88.8M ops/sec (64D) → 4.0M ops/sec (1024D)
+   - Inner Product: Best performance at 134.1M ops/sec (64D)
+   - Cosine Distance: 38.9M ops/sec (64D) → 1.5M ops/sec (1024D)
+   - Performance scales as expected with dimension
+
+2. Product Quantization Demo ✅
+   - Compression Ratio: 64x memory reduction
+   - Training Time: 1.01s for 1000 vectors
+   - Reconstruction MSE: 0.112 (very low error)
+   - Index Search: Working correctly
+   - Dynamic Insertion: Supported
+
+3. Basic Usage Example ✅
+   - Build Performance: 60.6ms for 1000 vectors (16.5K vectors/sec)
+   - Search Performance: 21.6μs average (46.3K QPS)
+   - ARM64 NEON: Confirmed active
+   - Memory: 128D vectors, L2 distance
+
+4. Comprehensive Benchmark (Partial) ⚠️
+   - Index Building: 770 points/sec for 10K vectors, 768D
+   - Single Search: 22.4K QPS average, 44.7μs latency
+   - Batch Search: 47.5K QPS (batch=1), 39.7K QPS (batch=10)
+   - Distance Functions: 5.1M ops/sec L2 distance
+   - Memory Usage: 31.7MB total, 3.25KB per vector
+   - Status: Stopped after 60s as requested
+
+PLATFORM CAPABILITIES:
+======================
+- ARM64 NEON: ✅ Active and working
+- x86-64 AVX2: ❌ N/A on ARM64
+- Target: ARM64 Apple Silicon
+- SIMD: NEON optimizations confirmed
+
+RECOMMENDATIONS:
+===============
+1. Create dedicated Metal GPU benchmark for macOS acceleration
+2. All CPU benchmarks show excellent NEON performance
+3. Memory usage is efficient with PQ compression
+4. Search performance meets expectations for M2 ARM64
+
+FILES CREATED:
+=============
+- simd_benchmark_*.log - Multiple SIMD performance tests
+- This summary file
+
+Next: Create Metal GPU benchmark example for Apple Silicon GPU acceleration.

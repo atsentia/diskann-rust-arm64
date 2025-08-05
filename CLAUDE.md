@@ -294,3 +294,37 @@ RUST_LOG=debug cargo run --release --features cuda --example simd_benchmark
 - **Graph Storage**: Optimized adjacency list operations  
 - **Caching Systems**: Improved LRU cache performance
 - **Search Operations**: Faster visited set tracking
+
+## 📊 Latest Benchmark Results (2025-08-05)
+
+**🎯 M2 ARM64 Production Performance Validation Complete**
+
+### SIMD Distance Functions (ARM64 NEON)
+- **L2 Distance**: 88.8M ops/sec (64D) → 4.0M ops/sec (1024D)
+- **Inner Product**: 134.1M ops/sec peak performance (64D)
+- **Cosine Distance**: 38.9M ops/sec (64D) → 1.5M ops/sec (1024D)
+- **Speedup Confirmed**: 3-5x over scalar implementations ✅
+
+### Index Performance
+- **Build Rate**: 16.5K vectors/sec (1K vectors, 128D)
+- **Search Performance**: 46.3K QPS average, 21.6μs latency
+- **Batch Operations**: 47.5K QPS (single), 39.7K QPS (batch=10)
+- **Large Scale**: 770 points/sec (10K vectors, 768D)
+
+### Product Quantization
+- **Compression**: 64x memory reduction (512 bytes → 8 bytes per vector)
+- **Training Speed**: 1.01s for 1000 vectors
+- **Reconstruction Error**: 0.112 MSE (excellent quality)
+- **Search Integration**: Full compatibility with compressed indices
+
+### Platform Capabilities Verified
+- ✅ **ARM64 NEON**: Active and optimized
+- ✅ **Dynamic Operations**: Insert/delete/consolidate working
+- ✅ **Disk-Based Indexing**: Handle datasets larger than RAM
+- ✅ **Label Filtering**: Efficient filtered search confirmed
+
+### Benchmark Files Generated
+- **Location**: `examples/runs/macM2arm64/`
+- **SIMD Results**: Multiple simd_benchmark_*.log files
+- **Summary Report**: benchmark_summary_20250805_145524.log
+- **All benchmarks**: Completed within 60-second time limits

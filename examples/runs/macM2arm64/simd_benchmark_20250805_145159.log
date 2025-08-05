@@ -1,0 +1,30 @@
+66 |     DimensionMismatch { expected: usize, actual: usize },
+66 |     DimensionMismatch { expected: usize, actual: usize },
+310 |     pub fn new(index: DiskANNIndex) -> Self {
+DiskANN SIMD Performance Benchmark - M2 ARM64
+===============================================
+CPU Features:
+  ARM64 NEON: true
+  x86-64 AVX2: false
+  x86-64 AVX-512: false
+=== Dimension: 64 ===
+  L2: 12.75 ns/call, 78.5M ops/sec (avg_dist: 7.028187)
+  Cosine: 26.13 ns/call, 38.3M ops/sec (avg_dist: 1.113112)
+  Inner Product: 7.70 ns/call, 129.8M ops/sec (avg_dist: 2.360188)
+=== Dimension: 128 ===
+  L2: 21.95 ns/call, 45.6M ops/sec (avg_dist: 8.515134)
+  Cosine: 42.02 ns/call, 23.8M ops/sec (avg_dist: 0.873891)
+  Inner Product: 16.78 ns/call, 59.6M ops/sec (avg_dist: -5.502372)
+=== Dimension: 256 ===
+  L2: 48.31 ns/call, 20.7M ops/sec (avg_dist: 11.711086)
+  Cosine: 121.58 ns/call, 8.2M ops/sec (avg_dist: 0.888681)
+  Inner Product: 43.82 ns/call, 22.8M ops/sec (avg_dist: -8.126588)
+=== Dimension: 512 ===
+  L2: 101.41 ns/call, 9.9M ops/sec (avg_dist: 18.011065)
+  Cosine: 270.88 ns/call, 3.7M ops/sec (avg_dist: 0.996890)
+  Inner Product: 87.14 ns/call, 11.5M ops/sec (avg_dist: -1.299847)
+=== Dimension: 768 ===
+  L2: 192.36 ns/call, 5.2M ops/sec (avg_dist: 22.185551)
+  Cosine: 459.39 ns/call, 2.2M ops/sec (avg_dist: 0.983117)
+  Inner Product: 159.85 ns/call, 6.3M ops/sec (avg_dist: -7.998454)
+=== Dimension: 1024 ===

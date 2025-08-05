@@ -1,0 +1,1401 @@
+warning: unused import: `crate`
+  --> src/cli/info.rs:11:5
+   |
+11 | use crate::*;
+   |     ^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+warning: unused variable: `query`
+  --> src/distance/mod.rs:77:33
+   |
+77 |     fn distance_to_query(&self, query: &[f32], target_id: usize) -> Result<f32> {
+   |                                 ^^^^^ help: if this is intentional, prefix it with an underscore: `_query`
+   |
+   = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `target_id`
+  --> src/distance/mod.rs:77:48
+   |
+77 |     fn distance_to_query(&self, query: &[f32], target_id: usize) -> Result<f32> {
+   |                                                ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_target_id`
+
+warning: variable does not need to be mutable
+   --> src/graph/vamana.rs:237:13
+    |
+237 |         let mut candidates: Vec<usize> = graph[vertex_id].clone();
+    |             ----^^^^^^^^^^
+    |             |
+    |             help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` on by default
+
+warning: variable does not need to be mutable
+   --> src/graph/vamana.rs:573:13
+    |
+573 |         let mut candidates: Vec<usize> = graph[vertex_id].clone();
+    |             ----^^^^^^^^^^
+    |             |
+    |             help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src/graph/prune.rs:127:5
+    |
+127 |     mut distance_fn: F,
+    |     ----^^^^^^^^^^^
+    |     |
+    |     help: remove this `mut`
+
+warning: unused variable: `i`
+  --> src/index/memory.rs:49:14
+   |
+49 |         for (i, vec) in vectors.iter().enumerate() {
+   |              ^ help: if this is intentional, prefix it with an underscore: `_i`
+
+warning: unused variable: `path`
+    --> src/index/disk.rs:1470:20
+     |
+1470 |     fn save(&self, path: &str) -> Result<()> {
+     |                    ^^^^ help: if this is intentional, prefix it with an underscore: `_path`
+
+warning: unused variable: `path`
+   --> src/index/mod.rs:153:34
+    |
+153 |     pub fn build_from_file(self, path: &str) -> Result<Box<dyn Index>> {
+    |                                  ^^^^ help: if this is intentional, prefix it with an underscore: `_path`
+
+warning: unused variable: `pq_distance_fn`
+   --> src/pq/index.rs:165:13
+    |
+165 |         let pq_distance_fn = PQDistanceFunction {
+    |             ^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_pq_distance_fn`
+
+warning: unused variable: `graph`
+   --> src/pq/index.rs:262:21
+    |
+262 |             let mut graph = self.graph.write();
+    |                     ^^^^^ help: if this is intentional, prefix it with an underscore: `_graph`
+
+warning: variable does not need to be mutable
+   --> src/pq/index.rs:262:17
+    |
+262 |             let mut graph = self.graph.write();
+    |                 ----^^^^^
+    |                 |
+    |                 help: remove this `mut`
+
+warning: unused variable: `labels`
+   --> src/labels/mod.rs:246:32
+    |
+246 |             LabelFilter::Exact(labels) => {
+    |                                ^^^^^^ help: if this is intentional, prefix it with an underscore: `_labels`
+
+warning: unused variable: `metric`
+   --> src/compat/c_api.rs:116:9
+    |
+116 |     let metric = match metric {
+    |         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_metric`
+
+warning: unused variable: `index_ram_limit`
+  --> src/compat/c_api.rs:99:5
+   |
+99 |     index_ram_limit: c_uint,
+   |     ^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_index_ram_limit`
+
+warning: unused variable: `graph_ram_limit`
+   --> src/compat/c_api.rs:100:5
+    |
+100 |     graph_ram_limit: c_uint,
+    |     ^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_graph_ram_limit`
+
+warning: unused variable: `params`
+   --> src/compat/c_api.rs:187:9
+    |
+187 |     let params = &*params;
+    |         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_params`
+
+warning: unused variable: `beamwidth`
+   --> src/compat/c_api.rs:225:5
+    |
+225 |     beamwidth: c_uint,
+    |     ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_beamwidth`
+
+warning: unused variable: `search_ram_limit`
+   --> src/compat/c_api.rs:226:5
+    |
+226 |     search_ram_limit: c_uint,
+    |     ^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_search_ram_limit`
+
+warning: unused variable: `num_points`
+   --> src/compat/mod.rs:149:9
+    |
+149 |         num_points: usize,
+    |         ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_num_points`
+
+warning: unused variable: `dimension`
+   --> src/compat/mod.rs:150:9
+    |
+150 |         dimension: usize,
+    |         ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_dimension`
+
+warning: unused variable: `metric`
+   --> src/compat/mod.rs:151:9
+    |
+151 |         metric: Distance,
+    |         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_metric`
+
+warning: unused variable: `params`
+   --> src/compat/mod.rs:181:9
+    |
+181 |         params: &SearchParams,
+    |         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_params`
+
+warning: unused variable: `index_guard`
+   --> src/external/index/index_impl.rs:108:21
+    |
+108 |                 let index_guard = index.read();
+    |                     ^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_index_guard`
+
+warning: variable does not need to be mutable
+   --> src/external/index/index_impl.rs:139:17
+    |
+139 |             let mut index = dynamic.write();
+    |                 ----^^^^^
+    |                 |
+    |                 help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src/external/index/index_impl.rs:172:17
+    |
+172 |             let mut index = dynamic.write();
+    |                 ----^^^^^
+    |                 |
+    |                 help: remove this `mut`
+
+warning: field `codebooks` is never read
+  --> src/index/disk.rs:13:5
+   |
+10 | struct SimplePQ {
+   |        -------- field in this struct
+...
+13 |     codebooks: Vec<Vec<Vec<f32>>>,
+   |     ^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: field `num_neighbors` is never read
+   --> src/index/disk.rs:203:5
+    |
+201 | struct DiskNode {
+    |        -------- field in this struct
+202 |     /// Number of neighbors
+203 |     num_neighbors: u32,
+    |     ^^^^^^^^^^^^^
+    |
+    = note: `DiskNode` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+
+warning: fields `vectors` and `query` are never read
+   --> src/pq/index.rs:308:5
+    |
+305 | struct PQDistanceFunction<'a> {
+    |        ------------------ fields in this struct
+...
+308 |     vectors: &'a Arc<RwLock<Vec<Option<Vec<f32>>>>>,
+    |     ^^^^^^^
+309 |     query: Vec<f32>,
+    |     ^^^^^
+
+warning: field `builder` is never read
+  --> src/external/index/index_impl.rs:19:5
+   |
+14 | pub struct InmemIndexWrapper<T> 
+   |            ----------------- field in this struct
+...
+19 |     builder: IndexBuilder,
+   |     ^^^^^^^
+
+warning: associated function `convert_vectors` is never used
+  --> src/external/index/index_impl.rs:38:8
+   |
+24 | / impl<T> InmemIndexWrapper<T>
+25 | | where T: Default + Copy + Sync + Send + Into<f32>
+   | |_________________________________________________- associated function in this implementation
+...
+38 |       fn convert_vectors(vectors: Vec<Vec<T>>) -> Vec<Vec<f32>> {
+   |          ^^^^^^^^^^^^^^^
+
+warning: field `build_params` is never read
+   --> src/external/index/index_impl.rs:188:5
+    |
+184 | pub struct DiskIndexWrapper<T>
+    |            ---------------- field in this struct
+...
+188 |     build_params: Option<DiskIndexBuildParameters>,
+    |     ^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/lib.rs:50:5
+   |
+50 |     pub verbose: bool,
+   |     ^^^^^^^^^^^^^^^^^
+   |
+note: the lint level is defined here
+  --> src/lib.rs:6:9
+   |
+6  | #![warn(missing_docs)]
+   |         ^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/lib.rs:51:5
+   |
+51 |     pub no_progress: bool,
+   |     ^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/lib.rs:66:25
+   |
+66 |     DimensionMismatch { expected: usize, actual: usize },
+   |                         ^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/lib.rs:66:42
+   |
+66 |     DimensionMismatch { expected: usize, actual: usize },
+   |                                          ^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/graph/vamana.rs:19:5
+   |
+19 |     pub id: usize,
+   |     ^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/graph/vamana.rs:20:5
+   |
+20 |     pub distance: f32,
+   |     ^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/graph/vamana.rs:694:5
+    |
+694 |     pub num_vertices: usize,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/graph/vamana.rs:695:5
+    |
+695 |     pub num_edges: usize,
+    |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/graph/vamana.rs:696:5
+    |
+696 |     pub avg_degree: f32,
+    |     ^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/graph/vamana.rs:697:5
+    |
+697 |     pub max_degree: usize,
+    |     ^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/graph/vamana.rs:698:5
+    |
+698 |     pub min_degree: usize,
+    |     ^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/graph/vamana.rs:699:5
+    |
+699 |     pub entry_point: usize,
+    |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a method
+  --> src/graph/search.rs:35:5
+   |
+35 |     fn insert(&mut self, id: usize) -> bool;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a method
+  --> src/graph/search.rs:36:5
+   |
+36 |     fn contains(&self, id: usize) -> bool;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a method
+  --> src/graph/search.rs:37:5
+   |
+37 |     fn clear(&mut self);
+   |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for an associated function
+  --> src/graph/search.rs:46:5
+   |
+46 |     pub fn new() -> Self {
+   |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for an associated function
+  --> src/graph/search.rs:74:5
+   |
+74 |     pub fn new(size: usize) -> Self {
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/graph/search.rs:118:5
+    |
+118 |     pub candidates: BinaryHeap<super::vamana::Neighbor>,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/graph/search.rs:119:5
+    |
+119 |     pub w: BinaryHeap<super::vamana::Neighbor>,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/graph/search.rs:120:5
+    |
+120 |     pub visited_hash: HashSetVisited,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/graph/search.rs:121:5
+    |
+121 |     pub visited_bits: BitVectorVisited,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for an associated function
+   --> src/graph/search.rs:125:5
+    |
+125 |     pub fn new(num_vertices: usize) -> Self {
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a method
+   --> src/graph/search.rs:134:5
+    |
+134 |     pub fn clear(&mut self) {
+    |     ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/memory.rs:199:5
+    |
+199 |     pub num_vectors: usize,
+    |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/memory.rs:200:5
+    |
+200 |     pub dimension: usize,
+    |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/memory.rs:201:5
+    |
+201 |     pub metric: Distance,
+    |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/memory.rs:202:5
+    |
+202 |     pub memory_usage_bytes: usize,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/memory.rs:203:5
+    |
+203 |     pub graph_degree_avg: f32,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/memory.rs:204:5
+    |
+204 |     pub graph_degree_max: usize,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/disk.rs:123:5
+    |
+123 |     pub nodes_visited: usize,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/disk.rs:124:5
+    |
+124 |     pub distance_computations: usize,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/disk.rs:125:5
+    |
+125 |     pub sectors_read: usize,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/disk.rs:126:5
+    |
+126 |     pub query_time_us: u64,
+    |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/disk.rs:837:5
+    |
+837 |     pub num_points: u64,
+    |     ^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/disk.rs:838:5
+    |
+838 |     pub data_dim: u64,
+    |     ^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/disk.rs:839:5
+    |
+839 |     pub aligned_dim: u64,
+    |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/disk.rs:840:5
+    |
+840 |     pub max_degree: u64,
+    |     ^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/disk.rs:841:5
+    |
+841 |     pub n_chunks: u64,
+    |     ^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/disk.rs:842:5
+    |
+842 |     pub disk_bytes_per_point: u64,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/disk.rs:843:5
+    |
+843 |     pub has_reorder_data: bool,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/disk.rs:844:5
+    |
+844 |     pub index_file_size: usize,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/disk.rs:845:5
+    |
+845 |     pub pq_file_size: usize,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/disk.rs:846:5
+    |
+846 |     pub reorder_file_size: usize,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/dynamic.rs:320:5
+    |
+320 |     pub num_vectors: usize,
+    |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/dynamic.rs:321:5
+    |
+321 |     pub num_deleted: usize,
+    |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/dynamic.rs:322:5
+    |
+322 |     pub dimension: usize,
+    |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/dynamic.rs:323:5
+    |
+323 |     pub metric: Distance,
+    |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/index/dynamic.rs:324:5
+    |
+324 |     pub fragmentation: f32,
+    |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/io/writer.rs:15:5
+   |
+15 |     pub magic: [u8; 8],
+   |     ^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/io/writer.rs:16:5
+   |
+16 |     pub version: u32,
+   |     ^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/io/writer.rs:17:5
+   |
+17 |     pub num_vectors: u32,
+   |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/io/writer.rs:18:5
+   |
+18 |     pub dimension: u32,
+   |     ^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/io/writer.rs:19:5
+   |
+19 |     pub max_degree: u32,
+   |     ^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/io/writer.rs:20:5
+   |
+20 |     pub metric: u32,
+   |     ^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/io/writer.rs:21:5
+   |
+21 |     pub graph_offset: u64,
+   |     ^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/io/writer.rs:22:5
+   |
+22 |     pub data_offset: u64,
+   |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/io/writer.rs:23:5
+   |
+23 |     pub reserved: [u8; 16],
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for an associated constant
+  --> src/io/writer.rs:27:5
+   |
+27 |     pub const MAGIC: &'static [u8; 8] = b"DISKANN\0";
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for an associated constant
+  --> src/io/writer.rs:28:5
+   |
+28 |     pub const VERSION: u32 = 1;
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for an associated constant
+  --> src/io/writer.rs:29:5
+   |
+29 |     pub const SIZE: usize = std::mem::size_of::<IndexHeader>();
+   |     ^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for an associated function
+  --> src/io/writer.rs:31:5
+   |
+31 |     pub fn new(num_vectors: u32, dimension: u32, max_degree: u32, metric: u32) -> Self {
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a method
+  --> src/io/writer.rs:45:5
+   |
+45 |     pub fn to_bytes(&self) -> [u8; Self::SIZE] {
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for an associated function
+  --> src/io/writer.rs:49:5
+   |
+49 |     pub fn from_bytes(bytes: &[u8]) -> Result<Self> {
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/io/cache.rs:11:5
+   |
+11 |     pub data: T,
+   |     ^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/io/cache.rs:12:5
+   |
+12 |     pub access_count: usize,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/utils/metrics.rs:98:5
+   |
+98 |     pub count: usize,
+   |     ^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/utils/metrics.rs:99:5
+   |
+99 |     pub mean: Duration,
+   |     ^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/utils/metrics.rs:100:5
+    |
+100 |     pub min: Duration,
+    |     ^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/utils/metrics.rs:101:5
+    |
+101 |     pub max: Duration,
+    |     ^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/utils/metrics.rs:102:5
+    |
+102 |     pub p50: Duration,
+    |     ^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/utils/metrics.rs:103:5
+    |
+103 |     pub p90: Duration,
+    |     ^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/utils/metrics.rs:104:5
+    |
+104 |     pub p99: Duration,
+    |     ^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a constant
+  --> src/labels/mod.rs:13:1
+   |
+13 | pub const INVALID_LABEL: Label = u32::MAX;
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/labels/mod.rs:293:5
+    |
+293 |     pub num_vectors: usize,
+    |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/labels/mod.rs:294:5
+    |
+294 |     pub num_unique_labels: usize,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/labels/mod.rs:295:5
+    |
+295 |     pub max_labels_per_vector: usize,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/labels/mod.rs:296:5
+    |
+296 |     pub avg_labels_per_vector: f32,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/labels/mod.rs:297:5
+    |
+297 |     pub label_distribution: HashMap<Label, usize>,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/types/mod.rs:13:5
+   |
+13 |     pub min_val: f32,
+   |     ^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/types/mod.rs:14:5
+   |
+14 |     pub max_val: f32,
+   |     ^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/types/mod.rs:15:5
+   |
+15 |     pub mean: f32,
+   |     ^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/types/mod.rs:16:5
+   |
+16 |     pub std: f32,
+   |     ^^^^^^^^^^^^
+
+warning: missing documentation for a variant
+  --> src/types/mod.rs:22:5
+   |
+22 |     Float32,
+   |     ^^^^^^^
+
+warning: missing documentation for a variant
+  --> src/types/mod.rs:23:5
+   |
+23 |     Float16,
+   |     ^^^^^^^
+
+warning: missing documentation for a variant
+  --> src/types/mod.rs:24:5
+   |
+24 |     Int8,
+   |     ^^^^
+
+warning: missing documentation for a variant
+  --> src/types/mod.rs:25:5
+   |
+25 |     UInt8,
+   |     ^^^^^
+
+warning: missing documentation for a variant
+   --> src/types/mod.rs:134:5
+    |
+134 |     Float32(Vec<f32>),
+    |     ^^^^^^^
+
+warning: missing documentation for a variant
+   --> src/types/mod.rs:135:5
+    |
+135 |     Float16(Vec<f16>),
+    |     ^^^^^^^
+
+warning: missing documentation for a variant
+   --> src/types/mod.rs:136:5
+    |
+136 |     Int8(Vec<i8>),
+    |     ^^^^
+
+warning: missing documentation for a variant
+   --> src/types/mod.rs:137:5
+    |
+137 |     UInt8(Vec<u8>),
+    |     ^^^^^
+
+warning: missing documentation for a struct field
+   --> src/types/mod.rs:211:5
+    |
+211 |     pub scale: f32,
+    |     ^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/types/mod.rs:212:5
+    |
+212 |     pub offset: f32,
+    |     ^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/formats/mod.rs:239:5
+    |
+239 |     pub num_vectors: u32,
+    |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/formats/mod.rs:240:5
+    |
+240 |     pub dimension: u32,
+    |     ^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/formats/mod.rs:241:5
+    |
+241 |     pub vector_type: u32,
+    |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/formats/mod.rs:242:5
+    |
+242 |     pub reserved: [u32; 5],
+    |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for an associated constant
+   --> src/formats/mod.rs:246:5
+    |
+246 |     pub const SIZE: usize = 32; // 8 * 4 bytes
+    |     ^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for an associated function
+   --> src/formats/mod.rs:248:5
+    |
+248 |     pub fn new(num_vectors: u32, dimension: u32, vector_type: VectorType) -> Self {
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a method
+   --> src/formats/mod.rs:257:5
+    |
+257 |     pub fn to_bytes(&self) -> [u8; Self::SIZE] {
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for an associated function
+   --> src/formats/mod.rs:271:5
+    |
+271 |     pub fn from_bytes(bytes: &[u8]) -> Result<Self> {
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/search/range.rs:16:5
+   |
+16 |     pub id: usize,
+   |     ^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/search/range.rs:17:5
+   |
+17 |     pub distance: f32,
+   |     ^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/search/filtered.rs:17:5
+   |
+17 |     pub id: usize,
+   |     ^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/search/filtered.rs:18:5
+   |
+18 |     pub distance: f32,
+   |     ^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/search/filtered.rs:19:5
+   |
+19 |     pub labels: Vec<u32>,
+   |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct
+  --> src/cli/build.rs:16:1
+   |
+16 | pub struct BuildArgs {
+   | ^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a function
+  --> src/cli/build.rs:70:1
+   |
+70 | pub fn run(args: BuildArgs, cli: &crate::Cli) -> crate::Result<()> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct
+  --> src/cli/search.rs:15:1
+   |
+15 | pub struct SearchArgs {
+   | ^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a function
+  --> src/cli/search.rs:65:1
+   |
+65 | pub fn run(args: SearchArgs, cli: &crate::Cli) -> crate::Result<()> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a function
+   --> src/cli/search.rs:180:1
+    |
+180 | pub fn load_queries(args: &SearchArgs) -> crate::Result<(Vec<Vec<f32>>, usize)> {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct
+  --> src/cli/benchmark.rs:15:1
+   |
+15 | pub struct BenchmarkArgs {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct
+  --> src/cli/benchmark.rs:78:1
+   |
+78 | pub struct BenchmarkResults {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/cli/benchmark.rs:79:5
+   |
+79 |     pub timestamp: String,
+   |     ^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/cli/benchmark.rs:80:5
+   |
+80 |     pub index_path: String,
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/cli/benchmark.rs:81:5
+   |
+81 |     pub queries_path: String,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/cli/benchmark.rs:82:5
+   |
+82 |     pub k: usize,
+   |     ^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/cli/benchmark.rs:83:5
+   |
+83 |     pub num_queries: usize,
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/cli/benchmark.rs:84:5
+   |
+84 |     pub latency_results: Option<LatencyResults>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/cli/benchmark.rs:85:5
+   |
+85 |     pub throughput_results: Option<ThroughputResults>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/cli/benchmark.rs:86:5
+   |
+86 |     pub recall_results: Option<RecallResults>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct
+  --> src/cli/benchmark.rs:90:1
+   |
+90 | pub struct LatencyResults {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/cli/benchmark.rs:91:5
+   |
+91 |     pub search_list_sizes: Vec<usize>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/cli/benchmark.rs:92:5
+   |
+92 |     pub avg_latency_ms: Vec<f64>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/cli/benchmark.rs:93:5
+   |
+93 |     pub p50_latency_ms: Vec<f64>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/cli/benchmark.rs:94:5
+   |
+94 |     pub p95_latency_ms: Vec<f64>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/cli/benchmark.rs:95:5
+   |
+95 |     pub p99_latency_ms: Vec<f64>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct
+  --> src/cli/benchmark.rs:99:1
+   |
+99 | pub struct ThroughputResults {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/cli/benchmark.rs:100:5
+    |
+100 |     pub search_list_sizes: Vec<usize>,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/cli/benchmark.rs:101:5
+    |
+101 |     pub qps: Vec<f64>,
+    |     ^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/cli/benchmark.rs:102:5
+    |
+102 |     pub threads: usize,
+    |     ^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct
+   --> src/cli/benchmark.rs:106:1
+    |
+106 | pub struct RecallResults {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/cli/benchmark.rs:107:5
+    |
+107 |     pub search_list_sizes: Vec<usize>,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/cli/benchmark.rs:108:5
+    |
+108 |     pub recall_at_k: Vec<f64>,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/cli/benchmark.rs:109:5
+    |
+109 |     pub recall_at_1: Vec<f64>,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a function
+   --> src/cli/benchmark.rs:112:1
+    |
+112 | pub fn run(args: BenchmarkArgs, cli: &crate::Cli) -> crate::Result<()> {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct
+  --> src/cli/convert.rs:13:1
+   |
+13 | pub struct ConvertArgs {
+   | ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a function
+  --> src/cli/convert.rs:63:1
+   |
+63 | pub fn run(args: ConvertArgs, cli: &crate::Cli) -> crate::Result<()> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct
+  --> src/cli/info.rs:14:1
+   |
+14 | pub struct InfoArgs {
+   | ^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a function
+  --> src/cli/info.rs:52:1
+   |
+52 | pub fn run(args: InfoArgs, cli: &crate::Cli) -> crate::Result<()> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/compat/mod.rs:30:5
+   |
+30 |     pub num_threads: u32,
+   |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/compat/mod.rs:31:5
+   |
+31 |     pub max_degree: u32,
+   |     ^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/compat/mod.rs:32:5
+   |
+32 |     pub search_list_size: u32,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/compat/mod.rs:33:5
+   |
+33 |     pub max_occlusion_size: u32,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/compat/mod.rs:34:5
+   |
+34 |     pub alpha: f32,
+   |     ^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/compat/mod.rs:35:5
+   |
+35 |     pub saturate_graph: bool,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/compat/mod.rs:36:5
+   |
+36 |     pub use_pq_build: bool,
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/compat/mod.rs:37:5
+   |
+37 |     pub num_pq_chunks: u32,
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/compat/mod.rs:38:5
+   |
+38 |     pub use_opq: bool,
+   |     ^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/compat/mod.rs:60:5
+   |
+60 |     pub search_list_size: u32,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/compat/mod.rs:61:5
+   |
+61 |     pub beamwidth: u32,
+   |     ^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/compat/mod.rs:62:5
+   |
+62 |     pub reorder_data: bool,
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/compat/mod.rs:296:5
+    |
+296 |     pub num_points: usize,
+    |     ^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/compat/mod.rs:297:5
+    |
+297 |     pub dimension: usize,
+    |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/compat/mod.rs:298:5
+    |
+298 |     pub graph_degree: f32,
+    |     ^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/compat/mod.rs:299:5
+    |
+299 |     pub max_degree: u32,
+    |     ^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/compat/mod.rs:300:5
+    |
+300 |     pub indexing_time: f64,
+    |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+   --> src/compat/mod.rs:301:5
+    |
+301 |     pub memory_usage: u64,
+    |     ^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for an associated function
+   --> src/compat/mod.rs:310:5
+    |
+310 |     pub fn new(index: DiskANNIndex) -> Self {
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a method
+   --> src/compat/mod.rs:316:5
+    |
+316 | /     pub fn search(
+317 | |         &self,
+318 | |         query: &[f32],
+319 | |         k: usize,
+320 | |         params: &SearchParams,
+321 | |     ) -> Result<(Vec<u32>, Vec<f32>)> {
+    | |_____________________________________^
+
+warning: missing documentation for a variant
+  --> src/compat/c_api.rs:10:5
+   |
+10 |     Success = 0,
+   |     ^^^^^^^
+
+warning: missing documentation for a variant
+  --> src/compat/c_api.rs:11:5
+   |
+11 |     InvalidParameter = -1,
+   |     ^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a variant
+  --> src/compat/c_api.rs:12:5
+   |
+12 |     OutOfMemory = -2,
+   |     ^^^^^^^^^^^
+
+warning: missing documentation for a variant
+  --> src/compat/c_api.rs:13:5
+   |
+13 |     FileNotFound = -3,
+   |     ^^^^^^^^^^^^
+
+warning: missing documentation for a variant
+  --> src/compat/c_api.rs:14:5
+   |
+14 |     IOError = -4,
+   |     ^^^^^^^
+
+warning: missing documentation for a variant
+  --> src/compat/c_api.rs:15:5
+   |
+15 |     UnknownError = -99,
+   |     ^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/compat/c_api.rs:21:5
+   |
+21 |     pub num_threads: c_uint,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/compat/c_api.rs:22:5
+   |
+22 |     pub max_degree: c_uint,
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/compat/c_api.rs:23:5
+   |
+23 |     pub search_list_size: c_uint,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/compat/c_api.rs:24:5
+   |
+24 |     pub max_occlusion_size: c_uint,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/compat/c_api.rs:25:5
+   |
+25 |     pub alpha: c_float,
+   |     ^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/compat/c_api.rs:26:5
+   |
+26 |     pub saturate_graph: c_int,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/compat/c_api.rs:27:5
+   |
+27 |     pub use_pq_build: c_int,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/compat/c_api.rs:28:5
+   |
+28 |     pub num_pq_chunks: c_uint,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/compat/c_api.rs:29:5
+   |
+29 |     pub use_opq: c_int,
+   |     ^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/compat/c_api.rs:35:5
+   |
+35 |     pub search_list_size: c_uint,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/compat/c_api.rs:36:5
+   |
+36 |     pub beamwidth: c_uint,
+   |     ^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a struct field
+  --> src/compat/c_api.rs:37:5
+   |
+37 |     pub reorder_data: c_int,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused `std::result::Result` that must be used
+   --> src/external/index/index_impl.rs:174:17
+    |
+174 |                 index.delete(id as usize);
+    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: this `Result` may be an `Err` variant, which should be handled
+    = note: `#[warn(unused_must_use)]` on by default
+help: use `let _ = ...` to ignore the resulting value
+    |
+174 |                 let _ = index.delete(id as usize);
+    |                 +++++++
+
+warning: missing documentation for an associated function
+  --> src/external/utils/mod.rs:49:5
+   |
+49 |     pub fn new() -> Self {
+   |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a method
+  --> src/external/utils/mod.rs:55:5
+   |
+55 |     pub fn elapsed(&self) -> std::time::Duration {
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: missing documentation for a method
+  --> src/external/vector.rs:48:5
+   |
+48 |     fn distance(&self, other: &[T; N], metric: Metric) -> f32;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `diskann` (lib) generated 213 warnings (run `cargo fix --lib -p diskann` to apply 6 suggestions)
+   Compiling diskann v0.1.0 (/Users/amund/diskann-swift/diskann-rust-neon)
+error[E0432]: unresolved import `diskann::DynamicIndex`
+ --> examples/performance_benchmark.rs:5:39
+  |
+5 | use diskann::{Distance, IndexBuilder, DynamicIndex, Result};
+  |                                       ^^^^^^^^^^^^ no `DynamicIndex` in the root
+  |
+  = help: consider importing this struct instead:
+          diskann::index::DynamicIndex
+
+error[E0425]: cannot find function `create_distance_function` in crate `diskann`
+  --> examples/performance_benchmark.rs:84:26
+   |
+84 |     let l2_fn = diskann::create_distance_function(Distance::L2, dimension);
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^ not found in `diskann`
+   |
+help: consider importing this function
+   |
+5  + use diskann::distance::create_distance_function;
+   |
+help: if you import `create_distance_function`, refer to it directly
+   |
+84 -     let l2_fn = diskann::create_distance_function(Distance::L2, dimension);
+84 +     let l2_fn = create_distance_function(Distance::L2, dimension);
+   |
+
+error[E0425]: cannot find function `create_distance_function` in crate `diskann`
+  --> examples/performance_benchmark.rs:96:30
+   |
+96 |     let cosine_fn = diskann::create_distance_function(Distance::Cosine, dimension);
+   |                              ^^^^^^^^^^^^^^^^^^^^^^^^ not found in `diskann`
+   |
+help: consider importing this function
+   |
+5  + use diskann::distance::create_distance_function;
+   |
+help: if you import `create_distance_function`, refer to it directly
+   |
+96 -     let cosine_fn = diskann::create_distance_function(Distance::Cosine, dimension);
+96 +     let cosine_fn = create_distance_function(Distance::Cosine, dimension);
+   |
+
+error[E0425]: cannot find function `create_distance_function` in crate `diskann`
+   --> examples/performance_benchmark.rs:108:27
+    |
+108 |     let dot_fn = diskann::create_distance_function(Distance::InnerProduct, dimension);
+    |                           ^^^^^^^^^^^^^^^^^^^^^^^^ not found in `diskann`
+    |
+help: consider importing this function
+    |
+5   + use diskann::distance::create_distance_function;
+    |
+help: if you import `create_distance_function`, refer to it directly
+    |
+108 -     let dot_fn = diskann::create_distance_function(Distance::InnerProduct, dimension);
+108 +     let dot_fn = create_distance_function(Distance::InnerProduct, dimension);
+    |
+
+Some errors have detailed explanations: E0425, E0432.
+For more information about an error, try `rustc --explain E0425`.
+error: could not compile `diskann` (example "performance_benchmark") due to 4 previous errors
