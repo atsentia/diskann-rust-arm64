@@ -62,7 +62,7 @@ pub struct ConvertArgs {
     pub stats: bool,
 }
 
-pub fn run(args: ConvertArgs, cli: &crate::Cli) -> diskann::Result<()> {
+pub fn run(args: ConvertArgs, cli: &crate::Cli) -> crate::Result<()> {
     if !cli.no_progress {
         println!("{}", style("🔄 Vector Format Conversion").bold().green());
         println!("  Input: {} ({})", 
@@ -150,7 +150,7 @@ pub fn run(args: ConvertArgs, cli: &crate::Cli) -> diskann::Result<()> {
     Ok(())
 }
 
-fn detect_format(path: &PathBuf, format_hint: &str) -> diskann::Result<String> {
+fn detect_format(path: &PathBuf, format_hint: &str) -> crate::Result<String> {
     if format_hint != "auto" {
         return Ok(format_hint.to_string());
     }
@@ -168,23 +168,23 @@ fn detect_format(path: &PathBuf, format_hint: &str) -> diskann::Result<String> {
     }
 }
 
-fn load_input_vectors(args: &ConvertArgs) -> diskann::Result<(Vec<Vec<f32>>, usize)> {
+fn load_input_vectors(args: &ConvertArgs) -> crate::Result<(Vec<Vec<f32>>, usize)> {
     let format = detect_format(&args.input, &args.input_format)?;
     
     match format.as_str() {
         "fvecs" => {
-            let (vectors, dim) = diskann::formats::read_fvecs(&args.input)?;
+            let (vectors, dim) = crate::formats::read_fvecs(&args.input)?;
             Ok((vectors, dim))
         }
         "bvecs" => {
-            let (int_vectors, dim) = diskann::formats::read_bvecs(&args.input)?;
+            let (int_vectors, dim) = crate::formats::read_bvecs(&args.input)?;
             let vectors = int_vectors.into_iter()
                 .map(|v| v.into_iter().map(|x| x as f32).collect())
                 .collect();
             Ok((vectors, dim))
         }
         "ivecs" => {
-            let (int_vectors, dim) = diskann::formats::read_ivecs(&args.input)?;
+            let (int_vectors, dim) = crate::formats::read_ivecs(&args.input)?;
             let vectors = int_vectors.into_iter()
                 .map(|v| v.into_iter().map(|x| x as f32).collect())
                 .collect();
@@ -193,14 +193,14 @@ fn load_input_vectors(args: &ConvertArgs) -> diskann::Result<(Vec<Vec<f32>>, usi
         "bin" => {
             let dimension = args.input_dimension
                 .ok_or_else(|| anyhow::anyhow!("Dimension required for binary format"))?;
-            let vectors = diskann::formats::read_binary_vectors(&args.input, dimension)?;
+            let vectors = crate::formats::read_binary_vectors(&args.input, dimension)?;
             Ok((vectors, dimension))
         }
         _ => Err(anyhow::anyhow!("Unsupported input format: {}", format)),
     }
 }
 
-fn center_vectors(vectors: &mut [Vec<f32>]) -> diskann::Result<()> {
+fn center_vectors(vectors: &mut [Vec<f32>]) -> crate::Result<()> {
     if vectors.is_empty() {
         return Ok(());
     }
@@ -229,7 +229,7 @@ fn center_vectors(vectors: &mut [Vec<f32>]) -> diskann::Result<()> {
     Ok(())
 }
 
-fn normalize_vectors(vectors: &mut [Vec<f32>]) -> diskann::Result<()> {
+fn normalize_vectors(vectors: &mut [Vec<f32>]) -> crate::Result<()> {
     for vector in vectors.iter_mut() {
         let norm: f32 = vector.iter().map(|&x| x * x).sum::<f32>().sqrt();
         
@@ -282,7 +282,7 @@ fn show_vector_statistics(vectors: &[Vec<f32>], cli: &crate::Cli) {
     println!("  Norm mean: {:.6}", mean_norm);
 }
 
-fn convert_data_type(vectors: &[Vec<f32>], args: &ConvertArgs) -> diskann::Result<Vec<u8>> {
+fn convert_data_type(vectors: &[Vec<f32>], args: &ConvertArgs) -> crate::Result<Vec<u8>> {
     match args.output_type.to_lowercase().as_str() {
         "float32" | "f32" => {
             // No conversion needed, just serialize as bytes
@@ -333,7 +333,7 @@ fn convert_data_type(vectors: &[Vec<f32>], args: &ConvertArgs) -> diskann::Resul
     }
 }
 
-fn calculate_quantization_params(vectors: &[Vec<f32>], args: &ConvertArgs) -> diskann::Result<QuantizationParams> {
+fn calculate_quantization_params(vectors: &[Vec<f32>], args: &ConvertArgs) -> crate::Result<QuantizationParams> {
     let mut all_values: Vec<f32> = vectors.iter().flatten().cloned().collect();
     all_values.sort_by(|a, b| a.partial_cmp(b).unwrap());
     
@@ -376,7 +376,7 @@ fn quantize_to_uint8(value: f32, params: &QuantizationParams) -> u8 {
     scaled.clamp(0.0, 255.0) as u8
 }
 
-fn save_output_vectors(data: &[u8], dimension: usize, args: &ConvertArgs) -> diskann::Result<()> {
+fn save_output_vectors(data: &[u8], dimension: usize, args: &ConvertArgs) -> crate::Result<()> {
     match args.output_format.to_lowercase().as_str() {
         "fvecs" => {
             // Convert bytes back to f32 vectors for fvecs format
@@ -398,7 +398,7 @@ fn save_output_vectors(data: &[u8], dimension: usize, args: &ConvertArgs) -> dis
                 vectors.push(vector);
             }
             
-            diskann::formats::write_fvecs(&args.output, &vectors)?;
+            crate::formats::write_fvecs(&args.output, &vectors)?;
         }
         "bvecs" => {
             // For bvecs, data should be uint8
@@ -411,7 +411,7 @@ fn save_output_vectors(data: &[u8], dimension: usize, args: &ConvertArgs) -> dis
                 vectors.push(data[start..end].to_vec());
             }
             
-            diskann::formats::write_bvecs(&args.output, &vectors)?;
+            crate::formats::write_bvecs(&args.output, &vectors)?;
         }
         "bin" => {
             // Write raw binary data

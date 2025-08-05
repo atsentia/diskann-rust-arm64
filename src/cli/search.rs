@@ -62,7 +62,7 @@ pub struct SearchArgs {
     pub max_queries: Option<usize>,
 }
 
-pub fn run(args: SearchArgs, cli: &crate::Cli) -> diskann::Result<()> {
+pub fn run(args: SearchArgs, cli: &crate::Cli) -> crate::Result<()> {
     let start_time = Instant::now();
     
     if !cli.no_progress {
@@ -177,7 +177,7 @@ pub fn run(args: SearchArgs, cli: &crate::Cli) -> diskann::Result<()> {
     Ok(())
 }
 
-fn load_queries(args: &SearchArgs) -> diskann::Result<(Vec<Vec<f32>>, usize)> {
+pub fn load_queries(args: &SearchArgs) -> crate::Result<(Vec<Vec<f32>>, usize)> {
     let format = detect_format(&args.queries, &args.format)?;
     
     match format.as_str() {
@@ -209,7 +209,7 @@ fn load_queries(args: &SearchArgs) -> diskann::Result<(Vec<Vec<f32>>, usize)> {
     }
 }
 
-fn detect_format(path: &PathBuf, format_hint: &str) -> diskann::Result<String> {
+fn detect_format(path: &PathBuf, format_hint: &str) -> crate::Result<String> {
     if format_hint != "auto" {
         return Ok(format_hint.to_string());
     }
@@ -259,7 +259,7 @@ fn write_results(
     results: &[(usize, Vec<(usize, f32)>)],
     output_path: &PathBuf,
     args: &SearchArgs,
-) -> diskann::Result<()> {
+) -> crate::Result<()> {
     use std::fs::File;
     use std::io::{BufWriter, Write};
     
@@ -288,7 +288,7 @@ fn display_sample_results(
     results: &[(usize, Vec<(usize, f32)>)],
     args: &SearchArgs,
     cli: &crate::Cli,
-) -> diskann::Result<()> {
+) -> crate::Result<()> {
     if cli.no_progress {
         return Ok(());
     }

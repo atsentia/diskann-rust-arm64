@@ -46,6 +46,8 @@ serde_json = "1.0"
 tokio = { version = "1.35", features = ["rt-multi-thread", "io-util", "fs", "time"] }
 byteorder = "1.5"
 rand = "0.8"
+lru = "0.12"
+ordered-float = "4.2"
 
 # Python bindings
 pyo3 = { version = "0.20", features = ["extension-module"], optional = true }
@@ -84,6 +86,10 @@ harness = false
 [[bin]]
 name = "diskann"
 path = "src/bin/main.rs"
+
+[[example]]
+name = "cold_disk_benchmark"
+path = "examples/cold_disk_benchmark.rs"
 
 [profile.release]
 lto = "fat"

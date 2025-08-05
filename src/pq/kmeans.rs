@@ -10,7 +10,7 @@ use rand::prelude::*;
 use std::f32;
 
 /// K-means clustering parameters
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct KMeansParams {
     /// Number of clusters (centroids)
     pub k: usize,

@@ -38,6 +38,13 @@ pub mod search;
 /// Command-line interface modules
 pub mod cli;
 
+/// CLI configuration structure
+#[derive(Debug)]
+pub struct Cli {
+    pub verbose: bool,
+    pub no_progress: bool,
+}
+
 // Re-export commonly used types
 pub use distance::{Distance, DistanceFunction};
 pub use index::{Index, IndexBuilder};
@@ -54,7 +61,7 @@ pub enum Error {
     
     /// I/O operation failed
     #[error("I/O error: {0}")]
-    Io(#[from] std::io::Error),
+    Io(String),
     
     /// Index operation failed
     #[error("Index error: {0}")]
@@ -63,6 +70,18 @@ pub enum Error {
     /// Invalid parameter
     #[error("Invalid parameter: {0}")]
     InvalidParameter(String),
+    
+    /// Invalid state for operation
+    #[error("Invalid state: {0}")]
+    InvalidState(String),
+    
+    /// Invalid file format
+    #[error("Invalid format: {0}")]
+    InvalidFormat(String),
+    
+    /// Serialization error
+    #[error("Serialization error: {0}")]
+    Serialization(String),
 }
 
 
