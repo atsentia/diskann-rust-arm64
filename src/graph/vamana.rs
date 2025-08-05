@@ -268,9 +268,10 @@ impl VamanaGraph {
             let mut should_prune = false;
             
             for &selected_id in &pruned {
-                let neighbor_slice: &[f32] = vectors[neighbor.id].as_slice();
-                let selected_slice: &[f32] = vectors[selected_id].as_slice();
-                let dist_to_selected = self.distance_fn.distance(neighbor_slice, selected_slice)?;
+                let dist_to_selected = self.distance_fn.distance(
+                    &vectors[neighbor.id][..],
+                    &vectors[selected_id][..]
+                )?;
                 if dist_to_selected < neighbor.distance {
                     should_prune = true;
                     break;
@@ -605,15 +606,16 @@ impl VamanaGraph {
             let mut should_prune = false;
             
             for &selected_id in &pruned {
-                if selected_id < vectors.len() {
-                    if let Some(selected_vec) = &vectors[selected_id] {
-                        if let Some(neighbor_vec) = &vectors[neighbor.id] {
+                if selected_id < vectors.len() && neighbor.id < vectors.len() {
+                    match (&vectors[selected_id], &vectors[neighbor.id]) {
+                        (Some(selected_vec), Some(neighbor_vec)) => {
                             let dist_to_selected = self.distance_fn.distance(neighbor_vec, selected_vec)?;
                             if dist_to_selected < neighbor.distance {
                                 should_prune = true;
                                 break;
                             }
                         }
+                        _ => {}
                     }
                 }
             }
