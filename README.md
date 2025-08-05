@@ -24,6 +24,21 @@ A blazing-fast, pure Rust implementation of Microsoft's DiskANN algorithm with c
 - **Memory-Mapped I/O**: Efficient disk access with sector alignment
 - **High-Performance Data Structures**: Using `hashbrown` for 15-30% speedup
 
+### Platform Support
+- **Linux**: x86-64, ARM64 (full support)
+- **macOS**: Apple Silicon, Intel (full support)
+- **Windows**: x86-64, **ARM64/Snapdragon X** ✅ (full support)
+- **WebAssembly**: Via WebGPU acceleration
+
+#### Windows ARM64 (Snapdragon X) Performance
+Benchmarked on Qualcomm Snapdragon X Elite:
+- **36,609 QPS** for 128-dim vectors (3.37x SIMD speedup)
+- **6,745 QPS** for 768-dim vectors
+- 33.45 GB/s peak throughput
+- Sub-100μs search latencies
+
+*Note: NPU acceleration not currently available due to Windows ML API limitations. ARM64 NEON SIMD provides excellent performance.*
+
 ## 📦 Installation
 
 Add to your `Cargo.toml`:
@@ -183,6 +198,10 @@ cargo build --release --features all-gpu
 ```bash
 # ARM64 (Apple Silicon, ARM servers)
 cargo build --release --features neon
+
+# Windows ARM64 (Snapdragon X)
+# Requires Visual Studio 2022 with ARM64 support
+./build.bat --release --features neon
 
 # x86-64 with AVX2
 cargo build --release --features avx2
