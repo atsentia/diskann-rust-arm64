@@ -4,19 +4,21 @@ A high-performance, memory-safe implementation of Microsoft's DiskANN algorithm 
 
 ## 🎯 Project Status
 
-### ✅ Phase 1 & 2 Complete (Core Functionality)
+### ✅ Phase 1-3 Complete (Production Ready)
 - **Core Distance Functions**: L2, Cosine, Inner Product with SIMD optimizations
 - **Vamana Graph Algorithm**: Full implementation with RobustPrune
 - **Dynamic Operations**: Insert, delete, and consolidate with lazy deletion
 - **Multi-Type Support**: float32, float16, int8, uint8 vectors
 - **File Format Support**: fvecs, bvecs, ivecs, binary formats
 - **Label/Filter Support**: Efficient filtered search with inverted index
-- **Streaming Index**: Async updates with background worker thread
+- **Range Search**: Find all neighbors within distance threshold
+- **Filtered Search**: Complex label-based filtering with multiple strategies
+- **Advanced I/O**: Memory-mapped files and async operations
 
-### 🚧 In Progress
-- Fixing remaining compilation errors
-- Range search functionality (Phase 3)
+### 🚧 Next Phase (Optional Advanced Features)
 - Product Quantization implementation (Phase 4)
+- Command-line tools and REST API (Phase 5-6)
+- Stitched/sharded indices for massive scale
 
 ## Features
 
@@ -140,6 +142,57 @@ let results = index.search(&query, 10)?;
 
 // Shutdown gracefully
 index.shutdown();
+```
+
+### Range Search
+
+```rust
+use diskann::search::{RangeSearcher, RangeSearchParams};
+
+// Find all vectors within distance threshold
+let searcher = RangeSearcher::new(Distance::L2, 128);
+let params = RangeSearchParams {
+    radius: 2.0,           // Maximum distance
+    max_results: 100,      // Limit results (0 = unlimited)
+    search_list_size: 50,  // Search quality vs speed
+};
+
+let results = searcher.search(&graph, &query, &vectors, &params)?;
+
+for neighbor in results {
+    println!("Vector {} at distance {}", neighbor.id, neighbor.distance);
+}
+```
+
+### Filtered Search with Labels
+
+```rust
+use diskann::search::{FilteredSearcher, FilteredSearchParams};
+use diskann::labels::{LabelIndex, LabelFilter};
+
+// Build label index
+let labels_per_vector = vec![
+    vec![1, 2],      // Vector 0 has labels 1, 2
+    vec![2, 3],      // Vector 1 has labels 2, 3  
+    vec![1],         // Vector 2 has label 1
+];
+let label_index = LabelIndex::build(labels_per_vector);
+
+// Create filtered searcher
+let searcher = FilteredSearcher::new(Distance::L2, 128);
+let params = FilteredSearchParams {
+    k: 10,
+    search_list_size: 50,
+    filter: LabelFilter::any_of(vec![1, 2]), // Find vectors with label 1 OR 2
+    include_labels: true,
+};
+
+let results = searcher.search(&graph, &query, &vectors, &label_index, &params)?;
+
+for neighbor in results {
+    println!("Vector {} (labels: {:?}) at distance {}", 
+             neighbor.id, neighbor.labels, neighbor.distance);
+}
 ```
 
 ### Working with Different Data Types
