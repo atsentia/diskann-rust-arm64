@@ -26,6 +26,22 @@ pub mod arm_sve;
 #[cfg(all(target_arch = "x86_64", feature = "amx"))]
 pub mod intel_amx;
 
+// GPU acceleration modules
+#[cfg(feature = "webgpu")]
+pub mod webgpu;
+
+#[cfg(feature = "cuda")]
+pub mod cuda;
+
+#[cfg(feature = "rocm")]
+pub mod rocm;
+
+#[cfg(all(feature = "metal", target_os = "macos"))]
+pub mod apple_metal;
+
+#[cfg(all(target_os = "windows", target_arch = "aarch64"))]
+pub mod qualcomm_directml;
+
 /// Portable SIMD implementations using pure Rust
 pub mod simd;
 
@@ -69,9 +85,52 @@ pub trait DistanceFunction: Send + Sync {
 
 /// Factory function to create the best distance function for the current platform
 pub fn create_distance_function(metric: Distance, dimension: usize) -> Box<dyn DistanceFunction> {
-    // Check CPU features at runtime and select the best implementation
-    // Priority order: Most advanced SIMD → Older SIMD → Portable SIMD
+    // Check available accelerators at runtime and select the best implementation
+    // Priority order: GPU → Advanced SIMD → Basic SIMD → Portable SIMD → Scalar
     
+    // GPU Acceleration (highest priority for large workloads)
+    #[cfg(feature = "cuda")]
+    {
+        if cuda::CudaDistance::is_available() {
+            log::debug!("Using NVIDIA CUDA GPU for {} distance (dim={})", metric_name(metric), dimension);
+            return Box::new(cuda::CudaDistance::new(metric, dimension).unwrap());
+        }
+    }
+    
+    #[cfg(feature = "rocm")]
+    {
+        if rocm::RocmDistance::is_available() {
+            log::debug!("Using AMD ROCm GPU for {} distance (dim={})", metric_name(metric), dimension);
+            return Box::new(rocm::RocmDistance::new(metric, dimension).unwrap());
+        }
+    }
+    
+    #[cfg(all(feature = "metal", target_os = "macos"))]
+    {
+        if apple_metal::AppleMetalDistance::is_available() {
+            log::debug!("Using Apple Metal GPU/NPU for {} distance (dim={})", metric_name(metric), dimension);
+            return Box::new(apple_metal::AppleMetalDistance::new(metric, dimension).unwrap());
+        }
+    }
+    
+    #[cfg(all(target_os = "windows", target_arch = "aarch64"))]
+    {
+        if qualcomm_directml::QualcommDistance::is_available() {
+            log::debug!("Using Qualcomm Snapdragon X GPU/NPU for {} distance (dim={})", metric_name(metric), dimension);
+            return Box::new(qualcomm_directml::QualcommDistance::new(metric, dimension).unwrap());
+        }
+    }
+    
+    #[cfg(feature = "webgpu")]
+    {
+        // WebGPU as cross-platform fallback GPU option
+        if let Ok(webgpu_dist) = webgpu::WebGpuDistance::new(metric, dimension) {
+            log::debug!("Using WebGPU cross-platform GPU for {} distance (dim={})", metric_name(metric), dimension);
+            return Box::new(webgpu_dist);
+        }
+    }
+    
+    // CPU SIMD Acceleration (fallback when GPU unavailable)
     // ARM64 processors
     #[cfg(all(target_arch = "aarch64", feature = "sve"))]
     {

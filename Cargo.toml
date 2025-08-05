@@ -18,6 +18,11 @@ sse42 = []  # x86-64 SSE4.2 support (broad compatibility)
 fma4 = []  # AMD FMA4 support (Bulldozer/Piledriver)
 sve = []  # ARM64 SVE support (future)
 amx = []  # Intel AMX support (future)
+webgpu = ["wgpu", "bytemuck"]  # Cross-platform GPU support
+cuda = ["cudarc"]  # NVIDIA CUDA support
+rocm = ["hip"]  # AMD ROCm support
+metal = ["metal"]  # Apple Metal support
+opencl = ["opencl3"]  # OpenCL support
 parallel = ["rayon", "num_cpus"]
 python = ["pyo3"]
 c-api = []
@@ -53,6 +58,14 @@ rand = "0.8"
 lru = "0.12"
 ordered-float = "4.2"
 hashbrown = "0.14"
+
+# GPU and accelerated computing
+wgpu = { version = "0.18", optional = true } # Cross-platform GPU compute
+bytemuck = { version = "1.14", features = ["derive"], optional = true }
+cudarc = { version = "0.9", optional = true } # NVIDIA CUDA
+hip = { version = "0.3", optional = true } # AMD ROCm
+metal = { version = "0.27", optional = true } # Apple Metal
+opencl3 = { version = "0.9", optional = true } # OpenCL
 
 # Python bindings
 pyo3 = { version = "0.20", features = ["extension-module"], optional = true }

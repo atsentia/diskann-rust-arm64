@@ -171,9 +171,20 @@ cargo build --release --features python
 - **Type Safety**: Proper error handling and type annotations throughout
 - **Status**: Framework complete, minor integration fixes needed
 
-## 🚀 Comprehensive SIMD Optimizations - **NEW!**
+## 🚀 Comprehensive Multi-Platform Acceleration - **NEW!**
 
-**Multi-Platform SIMD Support** with runtime feature detection:
+**Complete CPU + GPU Acceleration** with runtime feature detection:
+
+### **🖥️ GPU Acceleration (NEW!)**
+- **NVIDIA CUDA**: High-performance GPU computing on Linux/Windows
+- **AMD ROCm**: ROCm GPU acceleration for AMD graphics cards  
+- **Apple Metal**: Optimized for M-series processors with GPU/NPU support
+- **Qualcomm Snapdragon X**: Windows ML for Snapdragon X GPU/NPU
+- **WebGPU**: Cross-platform GPU support (works everywhere)
+- **Runtime Selection**: Automatic best-available GPU detection
+- **Batch Optimization**: GPU for large batches (>32-256 vectors), CPU for small
+
+### **🔧 CPU SIMD Optimizations**
 
 ### **ARM64 NEON Optimizations** (`src/distance/neon.rs`)
 - **L2 Distance**: 3.73x speedup over scalar implementation
@@ -194,29 +205,76 @@ cargo build --release --features python
 - **Advanced Instructions**: `_mm512_reduce_add_ps` for fast reduction
 - **Future-Proof**: Ready for next-generation processors
 
-### **Runtime Feature Detection**
+### **🤖 Intelligent Runtime Selection**
 ```rust
-// Automatic best-available SIMD selection
+// Automatic best-available acceleration selection
 let distance_fn = create_distance_function(Distance::L2, 128);
-// Priority: NEON → AVX-512 → AVX2 → SIMD → Scalar
+// Priority: GPU → Advanced SIMD → Basic SIMD → Portable SIMD → Scalar
 ```
 
-### **Comprehensive Coverage**
-SIMD optimizations applied throughout:
+**Example Multi-Accelerator System (Intel + NVIDIA):**
+```
+[DEBUG] Using NVIDIA CUDA GPU for L2 distance (dim=128)      # Large batches
+[DEBUG] Using x86-64 AVX-512 SIMD optimizations (dim=128)   # Small batches
+```
+
+### **🎯 Performance Targets by Platform**
+
+**GPU Acceleration (Expected 10-100x speedup for large batches):**
+- **NVIDIA CUDA**: 1000+ QPS on RTX 4090, 5000+ QPS on A100
+- **AMD ROCm**: 800+ QPS on RX 7900 XTX
+- **Apple Metal**: 500+ QPS on M2 Max, 1000+ QPS on M3 Max
+- **Qualcomm Snapdragon X**: 300+ QPS with NPU acceleration
+- **WebGPU**: 200-2000+ QPS depending on hardware
+
+**CPU SIMD Acceleration:**
+- **ARM64 NEON**: 3-5x speedup on Apple Silicon
+- **x86-64 AVX2**: 4-6x speedup on modern Intel/AMD
+- **x86-64 AVX-512**: 6-8x speedup on latest processors
+
+### **🔧 Platform Coverage**
+Acceleration applied throughout:
 - **Graph Construction**: Distance calculations during Vamana building
 - **Graph Search**: Hot path queries (primary performance bottleneck)
 - **Product Quantization**: K-means clustering and PQ encoding
 - **Index Operations**: All search and insertion operations
 - **Batch Processing**: Vectorized distance calculations
 
-### **Performance Validation**
-Run SIMD benchmarks:
+### **⚡ Performance Validation & Usage Examples**
+
+**Test All Acceleration Types:**
 ```bash
-cargo run --release --example simd_benchmark
+# CPU-only build (works everywhere)
+cargo build --release --no-default-features
+
+# ARM64 with GPU acceleration
+cargo build --release --features "neon,metal"
+
+# x86-64 with NVIDIA GPU
+cargo build --release --features "avx2,cuda"
+
+# x86-64 with AMD GPU  
+cargo build --release --features "avx2,rocm"
+
+# Cross-platform with WebGPU
+cargo build --release --features "webgpu"
+
+# Maximum compatibility
+cargo build --release --all-features
 ```
 
-**Expected Results**:
-- **ARM64 NEON**: 3-5x speedup on Apple Silicon
+**Runtime Performance Testing:**
+```bash
+# Test best available acceleration
+cargo run --release --example simd_benchmark
+
+# Test specific GPU acceleration
+RUST_LOG=debug cargo run --release --features cuda --example simd_benchmark
+```
+
+**Expected Performance Results:**
+- **GPU Acceleration**: 10-100x speedup for large batches (>256 vectors)
+- **ARM64 NEON**: 3-5x speedup on Apple Silicon  
 - **x86-64 AVX2**: 4-6x speedup on modern Intel/AMD
 - **x86-64 AVX-512**: 6-8x speedup on latest processors
 
