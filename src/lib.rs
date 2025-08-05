@@ -33,6 +33,9 @@ pub mod labels;
 /// Data type support (int8, uint8, float16, float32)
 pub mod types;
 
+/// File format support (fvecs, bvecs, ivecs, binary)
+pub mod formats;
+
 // Re-export commonly used types
 pub use distance::{Distance, DistanceFunction};
 pub use index::{Index, IndexBuilder};

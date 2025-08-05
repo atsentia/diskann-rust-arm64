@@ -3,6 +3,7 @@
 //! This module provides common utilities used throughout the library.
 
 pub mod metrics;
+pub mod aligned;
 
 use std::fs::File;
 use std::io::{BufReader, Read};
