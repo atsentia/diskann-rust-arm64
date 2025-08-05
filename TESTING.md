@@ -2,7 +2,7 @@
 
 This document outlines the comprehensive testing strategy for the DiskANN Rust implementation. 
 
-**Status**: Phase 1-3 Complete with comprehensive test coverage for all core functionality.
+**Status**: Phase 1-5 Complete with comprehensive test coverage for all core functionality and CLI tools.
 
 ## Test Categories
 
@@ -293,6 +293,66 @@ cargo bench --features neon
 # Test AVX2
 cargo test --features avx2
 cargo bench --features avx2
+```
+
+### Command-Line Interface Testing
+
+#### CLI Integration Tests
+```bash
+# Test CLI compilation
+cargo build --bin diskann
+
+# Test basic functionality
+cargo run --bin diskann -- --help
+cargo run --bin diskann -- build --help
+cargo run --bin diskann -- search --help
+
+# End-to-end CLI testing (requires test data)
+# Generate test vectors
+echo "1.0 0.0 0.0" > test_vectors.txt
+echo "0.0 1.0 0.0" >> test_vectors.txt
+echo "0.0 0.0 1.0" >> test_vectors.txt
+
+# Build index
+cargo run --bin diskann -- build \
+  --input test_vectors.txt \
+  --output test.index \
+  --dimension 3 \
+  --metric l2
+
+# Search index
+cargo run --bin diskann -- search \
+  --index test.index \
+  --queries test_vectors.txt \
+  --k 2
+
+# Benchmark (requires ground truth)
+cargo run --bin diskann -- benchmark \
+  --index test.index \
+  --queries test_vectors.txt \
+  --latency --throughput
+
+# Convert formats
+cargo run --bin diskann -- convert \
+  --input test_vectors.txt \
+  --output test_vectors.bin \
+  --output-format bin
+
+# Analyze files
+cargo run --bin diskann -- info \
+  --input test_vectors.txt \
+  --detailed --distribution
+```
+
+#### CLI Error Handling Tests
+```bash
+# Test invalid arguments
+cargo run --bin diskann -- build --invalid-arg
+cargo run --bin diskann -- search --index nonexistent.index
+cargo run --bin diskann -- convert --input missing.file
+
+# Test file format validation
+cargo run --bin diskann -- info --input invalid.file
 ```
 
 ### WebAssembly

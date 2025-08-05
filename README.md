@@ -4,7 +4,7 @@ A high-performance, memory-safe implementation of Microsoft's DiskANN algorithm 
 
 ## 🎯 Project Status
 
-### ✅ Phase 1-4 Complete (Production Ready)
+### ✅ Phase 1-5 Complete (Production Ready + CLI)
 - **Core Distance Functions**: L2, Cosine, Inner Product with SIMD optimizations
 - **Vamana Graph Algorithm**: Full implementation with RobustPrune
 - **Dynamic Operations**: Insert, delete, and consolidate with lazy deletion
@@ -15,9 +15,11 @@ A high-performance, memory-safe implementation of Microsoft's DiskANN algorithm 
 - **Filtered Search**: Complex label-based filtering with multiple strategies
 - **Product Quantization**: Memory-efficient storage with up to 64x compression
 - **Advanced I/O**: Memory-mapped files and async operations
+- **Command-Line Interface**: Professional CLI with 5 subcommands and progress bars
+- **Index Serialization**: Binary persistence for production deployments
 
 ### 🚧 Next Phase (Optional Advanced Features)
-- Command-line tools and REST API (Phase 5-6)
+- REST API server (Phase 6)
 - Stitched/sharded indices for massive scale
 
 ## Features
@@ -29,6 +31,7 @@ A high-performance, memory-safe implementation of Microsoft's DiskANN algorithm 
 - 🔄 **Dynamic Updates**: Support for insertions, deletions, and consolidation
 - 🏷️ **Label Filtering**: Efficient filtered search with label support
 - 🗜️ **Product Quantization**: Up to 64x memory compression with configurable quality
+- 🖥️ **Command-Line Tools**: Professional CLI with build, search, benchmark, convert, and info commands
 - 📦 **Modular Design**: Use only the components you need
 
 ## Architecture
@@ -76,7 +79,51 @@ Based on our C++ ARM64 NEON optimizations:
 
 ## Quick Start
 
-### Basic In-Memory Index
+### Command-Line Interface
+
+The DiskANN CLI provides professional tools for building, searching, and analyzing vector indices:
+
+```bash
+# Build an index from vectors
+cargo run --bin diskann -- build \
+  --input vectors.fvecs \
+  --output index.diskann \
+  --metric l2 \
+  --max-degree 64
+
+# Search the index
+cargo run --bin diskann -- search \
+  --index index.diskann \
+  --queries queries.fvecs \
+  --k 10 \
+  --output results.txt
+
+# Benchmark performance
+cargo run --bin diskann -- benchmark \
+  --index index.diskann \
+  --queries queries.fvecs \
+  --ground-truth ground_truth.ivecs \
+  --all
+
+# Convert between formats with quantization
+cargo run --bin diskann -- convert \
+  --input vectors.fvecs \
+  --output vectors_int8.bvecs \
+  --output-format bvecs \
+  --output-type int8 \
+  --normalize
+
+# Analyze vector files
+cargo run --bin diskann -- info \
+  --input vectors.fvecs \
+  --detailed \
+  --distribution \
+  --duplicates
+```
+
+### Rust API Examples
+
+#### Basic In-Memory Index
 
 ```rust
 use diskann::{IndexBuilder, Distance};
@@ -271,6 +318,9 @@ cargo build --release --no-default-features
 
 # Build with specific features
 cargo build --release --features "avx2,python"
+
+# Build CLI tools
+cargo build --release --bin diskann
 ```
 
 ### Run Tests

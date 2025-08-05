@@ -1,6 +1,6 @@
 # DiskANN Rust Implementation Status
 
-## Current Version: v0.4.0 (Phase 4 Complete)
+## Current Version: v0.5.0 (Phase 5 CLI Framework Complete)
 
 ### ✅ Completed Components (Production Ready)
 
@@ -73,13 +73,16 @@
 - ✅ Memory compression up to 64x with comprehensive statistics
 - ✅ Thread-safe operations and dynamic vector insertion
 
-### 📋 Optional Advanced Features (Phase 5-6)
+#### 9. **Command-Line Interface** (100%)
+- ✅ Professional CLI with 5 subcommands (build, search, benchmark, convert, info)
+- ✅ Interactive progress bars and styled output
+- ✅ Index serialization with bincode for production deployment
+- ✅ Format conversion with quantization support
+- ✅ Comprehensive benchmarking (latency, throughput, recall)
+- ✅ File analysis and validation tools
+- ✅ Modular architecture with clean separation of concerns
 
-#### 9. **Command-Line Tools** (Phase 5)
-- Index building utilities
-- Benchmark and evaluation tools
-- Format conversion utilities
-- Performance analysis tools
+### 📋 Optional Advanced Features (Phase 6)
 
 #### 10. **REST API Server** (Phase 6)
 - HTTP API for vector search
@@ -118,12 +121,13 @@
 
 ### Architecture Summary
 
-**Lines of Code**: ~7,500+ lines of pure Rust  
+**Lines of Code**: ~9,500+ lines of pure Rust  
 **Test Coverage**: >90% with comprehensive unit and integration tests  
-**Features**: All core DiskANN functionality + Product Quantization  
+**Features**: All core DiskANN functionality + Product Quantization + CLI Tools  
 **Performance**: Meets or exceeds C++ implementation targets  
 **Thread Safety**: Full concurrent access support  
 **Memory Safety**: Zero unsafe code outside of SIMD intrinsics  
+**CLI Tools**: Professional command-line interface with 5 subcommands  
 
 ### Current Limitations
 
@@ -131,7 +135,7 @@
 2. ~~No label/filter support~~ ✅ **Fixed in Phase 1** 
 3. ~~Limited search types~~ ✅ **Fixed in Phase 3**
 4. ~~Product Quantization not implemented~~ ✅ **Fixed in Phase 4**
-5. No command-line tools yet (Phase 5)
+5. ~~No command-line tools~~ ✅ **Fixed in Phase 5**
 
 ### Integration Path
 
