@@ -354,3 +354,42 @@ mod tests {
         }
     }
 }
+
+/// Standalone L2 distance function using SIMD
+pub fn l2_distance(a: &[f32], b: &[f32]) -> Result<f32> {
+    if a.len() != b.len() {
+        return Err(anyhow::anyhow!(
+            "Vector dimensions must match: {} vs {}",
+            a.len(),
+            b.len()
+        ));
+    }
+    
+    Ok(SimdDistance::l2_distance_simd(a, b).sqrt())
+}
+
+/// Standalone cosine distance function using SIMD  
+pub fn cosine_distance(a: &[f32], b: &[f32]) -> Result<f32> {
+    if a.len() != b.len() {
+        return Err(anyhow::anyhow!(
+            "Vector dimensions must match: {} vs {}",
+            a.len(),
+            b.len()
+        ));
+    }
+    
+    Ok(SimdDistance::cosine_distance_simd(a, b))
+}
+
+/// Standalone inner product distance function using SIMD
+pub fn inner_product_distance(a: &[f32], b: &[f32]) -> Result<f32> {
+    if a.len() != b.len() {
+        return Err(anyhow::anyhow!(
+            "Vector dimensions must match: {} vs {}",
+            a.len(),
+            b.len()
+        ));
+    }
+    
+    Ok(-SimdDistance::dot_product_simd(a, b))
+}

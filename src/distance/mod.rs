@@ -21,7 +21,7 @@ pub mod simd;
 pub mod scalar;
 
 /// Distance metric types
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum Distance {
     /// L2 (Euclidean) distance
     L2,
@@ -44,6 +44,12 @@ pub trait DistanceFunction: Send + Sync {
     
     /// Batch distance calculation from query to multiple points
     fn batch_distance(&self, query: &[f32], points: &[f32], distances: &mut [f32]) -> Result<()>;
+    
+    /// Calculate distance from query to a specific vector ID (for graph search)
+    fn distance_to_query(&self, query: &[f32], target_id: usize) -> Result<f32> {
+        // Default implementation - subclasses can override for specialized behavior
+        Err(anyhow::anyhow!("distance_to_query not implemented for this distance function"))
+    }
     
     /// Get the metric type
     fn metric(&self) -> Distance;
