@@ -35,6 +35,9 @@ pub mod formats;
 /// Search algorithms (range search, filtered search)
 pub mod search;
 
+/// Command-line interface modules
+pub mod cli;
+
 // Re-export commonly used types
 pub use distance::{Distance, DistanceFunction};
 pub use index::{Index, IndexBuilder};

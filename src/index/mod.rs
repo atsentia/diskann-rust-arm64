@@ -97,6 +97,22 @@ impl IndexBuilder {
         )?))
     }
     
+    /// Build a concrete MemoryIndex from vectors (for serialization)
+    pub fn build_memory_index(self, vectors: Vec<Vec<f32>>) -> Result<memory::MemoryIndex> {
+        let dimension = self.dimension.unwrap_or_else(|| {
+            vectors.first().map(|v| v.len()).unwrap_or(0)
+        });
+        
+        memory::MemoryIndex::build(
+            vectors,
+            dimension,
+            self.metric,
+            self.max_degree,
+            self.search_list_size,
+            self.alpha,
+        )
+    }
+    
     /// Build an index from a file
     pub fn build_from_file(self, path: &str) -> Result<Box<dyn Index>> {
         // TODO: Implement file loading

@@ -7,6 +7,16 @@ use crate::{Result, Error};
 use half::f16;
 use num_traits::{Float, FromPrimitive, ToPrimitive};
 use std::fmt::Debug;
+use serde::{Deserialize, Serialize};
+
+/// Parameters for quantization
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct QuantizationParams {
+    pub min_val: f32,
+    pub max_val: f32,
+    pub mean: f32,
+    pub std: f32,
+}
 
 /// Supported vector element types
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

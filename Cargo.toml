@@ -50,6 +50,13 @@ rand = "0.8"
 # Python bindings
 pyo3 = { version = "0.20", features = ["extension-module"], optional = true }
 
+# CLI dependencies
+clap = { version = "4.4", features = ["derive", "cargo"] }
+indicatif = "0.17"
+console = "0.15"
+humantime = "2.1"
+chrono = { version = "0.4", features = ["serde"] }
+
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }
 proptest = "1.4"
@@ -73,6 +80,10 @@ harness = false
 [[bench]]
 name = "index"
 harness = false
+
+[[bin]]
+name = "diskann"
+path = "src/bin/main.rs"
 
 [profile.release]
 lto = "fat"

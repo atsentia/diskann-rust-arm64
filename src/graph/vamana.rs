@@ -10,9 +10,10 @@ use std::collections::{BinaryHeap, HashSet};
 use std::cmp::Ordering;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering as AtomicOrdering};
+use serde::{Serialize, Deserialize, Serializer, Deserializer};
 
 /// Neighbor of a vertex in the graph
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Neighbor {
     pub id: usize,
     pub distance: f32,
@@ -39,6 +40,19 @@ impl PartialOrd for Neighbor {
     }
 }
 
+/// Serializable representation of VamanaGraph
+#[derive(Serialize, Deserialize)]
+struct SerializableVamanaGraph {
+    graph: Vec<Vec<usize>>,
+    max_degree: usize,
+    search_list_size: usize,
+    alpha: f32,
+    num_vertices: usize,
+    entry_point: usize,
+    metric: Distance,
+    dimension: usize,
+}
+
 /// Vamana graph structure
 pub struct VamanaGraph {
     /// Adjacency list representation
@@ -55,6 +69,10 @@ pub struct VamanaGraph {
     entry_point: AtomicUsize,
     /// Distance calculator
     distance_fn: Box<dyn DistanceFunction>,
+    /// Metric for serialization
+    metric: Distance,
+    /// Dimension for serialization
+    dimension: usize,
 }
 
 impl VamanaGraph {
@@ -75,6 +93,8 @@ impl VamanaGraph {
             num_vertices,
             entry_point: AtomicUsize::new(0),
             distance_fn: create_distance_function(metric, dimension),
+            metric,
+            dimension,
         }
     }
     
@@ -618,6 +638,47 @@ impl VamanaGraph {
         }
         
         Ok(())
+    }
+}
+
+// Custom serialization implementation for VamanaGraph
+impl Serialize for VamanaGraph {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let graph = self.graph.read();
+        let serializable = SerializableVamanaGraph {
+            graph: graph.clone(),
+            max_degree: self.max_degree,
+            search_list_size: self.search_list_size,
+            alpha: self.alpha,
+            num_vertices: self.num_vertices,
+            entry_point: self.entry_point.load(AtomicOrdering::Relaxed),
+            metric: self.metric,
+            dimension: self.dimension,
+        };
+        serializable.serialize(serializer)
+    }
+}
+
+impl<'de> Deserialize<'de> for VamanaGraph {
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let serializable = SerializableVamanaGraph::deserialize(deserializer)?;
+        Ok(VamanaGraph {
+            graph: Arc::new(RwLock::new(serializable.graph)),
+            max_degree: serializable.max_degree,
+            search_list_size: serializable.search_list_size,
+            alpha: serializable.alpha,
+            num_vertices: serializable.num_vertices,
+            entry_point: AtomicUsize::new(serializable.entry_point),
+            distance_fn: create_distance_function(serializable.metric, serializable.dimension),
+            metric: serializable.metric,
+            dimension: serializable.dimension,
+        })
     }
 }
 
