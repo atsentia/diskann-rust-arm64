@@ -4,7 +4,7 @@
 //! including fvecs, bvecs, ivecs, and binary formats.
 
 use crate::{Result, Error};
-use crate::types::{VectorType, VectorElement};
+use crate::types::VectorType;
 use std::fs::File;
 use std::io::{Read, Write, BufReader, BufWriter};
 use std::path::Path;
@@ -353,6 +353,37 @@ pub fn read_binary<P: AsRef<Path>>(path: P) -> Result<(Vec<Vec<f32>>, usize, Vec
     Ok((vectors, dimension, vector_type))
 }
 
+/// Read float32 vectors from binary format (backward compatibility)
+pub fn read_binary_vectors<P: AsRef<Path>>(path: P, dimension: usize) -> Result<Vec<Vec<f32>>> {
+    // Try to read with header first
+    if let Ok((vectors, _, _)) = read_binary(&path) {
+        return Ok(vectors);
+    }
+    
+    // Fallback to raw binary format (no header, just float32 data)
+    let file = File::open(path)?;
+    let file_size = file.metadata()?.len() as usize;
+    let vector_size = dimension * std::mem::size_of::<f32>();
+    let num_vectors = file_size / vector_size;
+    
+    if file_size % vector_size != 0 {
+        return Err(anyhow::anyhow!("File size not divisible by vector size"));
+    }
+    
+    let mut vectors = Vec::with_capacity(num_vectors);
+    let mut reader = BufReader::new(file);
+    
+    for _ in 0..num_vectors {
+        let mut vector = vec![0.0f32; dimension];
+        for i in 0..dimension {
+            vector[i] = reader.read_f32::<LittleEndian>()?;
+        }
+        vectors.push(vector);
+    }
+    
+    Ok(vectors)
+}
+
 /// Write vectors to binary format
 pub fn write_binary<P: AsRef<Path>>(
     path: P,
@@ -412,36 +443,6 @@ pub fn write_binary<P: AsRef<Path>>(
     Ok(())
 }
 
-/// Read vectors from binary format (simplified version for CLI)
-pub fn read_binary_vectors<P: AsRef<Path>>(path: P, dimension: usize) -> Result<Vec<Vec<f32>>> {
-    let mut file = File::open(path)?;
-    let mut vectors = Vec::new();
-    
-    // Read vectors as raw f32 data (assuming float32 format)
-    let mut buffer = [0u8; 4];
-    loop {
-        let mut vector = Vec::with_capacity(dimension);
-        
-        for _ in 0..dimension {
-            match file.read_exact(&mut buffer) {
-                Ok(()) => {
-                    let value = f32::from_le_bytes(buffer);
-                    vector.push(value);
-                }
-                Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => {
-                    if vector.is_empty() {
-                        return Ok(vectors); // End of file
-                    } else {
-                        return Err(anyhow::anyhow!("Incomplete vector at end of file"));
-                    }
-                }
-                Err(e) => return Err(e.into()),
-            }
-        }
-        
-        vectors.push(vector);
-    }
-}
 
 /// Convert between vector formats
 pub fn convert_format<P1: AsRef<Path>, P2: AsRef<Path>>(
