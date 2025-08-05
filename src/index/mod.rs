@@ -9,7 +9,7 @@ pub mod dynamic;
 
 // Re-export key types from sub-modules
 pub use disk::{PQFlashIndex, PQFlashConfig, QueryStats, DiskIndexStats};
-pub use memory::MemoryIndex;
+pub use memory::{MemoryIndex, IndexStats};
 pub use dynamic::DynamicIndex;
 
 use crate::{Distance, Result};
@@ -27,6 +27,37 @@ pub trait Index: Send + Sync {
     
     /// Get the distance metric
     fn metric(&self) -> Distance;
+    
+    /// Range search - find all neighbors within radius
+    fn range_search(&self, query: &[f32], radius: f32, search_list_size: usize) -> Result<Vec<(usize, f32)>> {
+        // Default implementation using regular search with filtering
+        let initial_k = search_list_size.min(self.size());
+        let mut results = self.search(query, initial_k)?;
+        results.retain(|(_, dist)| *dist <= radius);
+        Ok(results)
+    }
+    
+    /// Save index to disk
+    fn save(&self, _path: &str) -> Result<()> {
+        Err(anyhow::anyhow!("Save not implemented for this index type"))
+    }
+    
+    /// Get index statistics
+    fn stats(&self) -> IndexStats {
+        IndexStats {
+            num_vectors: self.size(),
+            dimension: self.dimension(),
+            metric: self.metric(),
+            memory_usage_bytes: 0, // Default, override in implementations
+            graph_degree_avg: 0.0,
+            graph_degree_max: 0,
+        }
+    }
+    
+    /// Get memory usage in bytes
+    fn memory_usage_bytes(&self) -> usize {
+        self.stats().memory_usage_bytes
+    }
 }
 
 /// Builder for creating indices

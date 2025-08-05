@@ -208,6 +208,33 @@ struct DiskNode {
 }
 
 impl PQFlashIndex {
+    /// Estimate memory usage in bytes
+    fn memory_usage_estimate(&self) -> usize {
+        let cache_size = self.node_cache.read().len() * std::mem::size_of::<CachedNode>();
+        let coord_cache_size = self.coord_cache.read().len() * 128; // Estimate
+        let base = std::mem::size_of::<Self>();
+        base + cache_size + coord_cache_size
+    }
+    
+    /// Build a PQFlashIndex from vectors and save to disk
+    pub fn build_from_vectors<P: AsRef<Path>>(
+        path: P,
+        vectors: Vec<Vec<f32>>,
+        config: PQFlashConfig,
+    ) -> Result<Self> {
+        if vectors.is_empty() {
+            return Err(Error::InvalidParameter("No vectors provided".to_string()).into());
+        }
+        
+        let dimension = vectors[0].len();
+        let metric = Distance::L2; // Default, could be part of config
+        
+        let mut index = Self::new(dimension, metric, config);
+        index.build_and_save(&vectors, path.as_ref())?;
+        index.load(path.as_ref())?;
+        Ok(index)
+    }
+    
     /// Create a new PQ Flash Index
     pub fn new(
         dimension: usize,
@@ -1415,5 +1442,50 @@ mod tests {
         let result = index.search(&wrong_dim_query, 5, 20);
         // This might succeed with dimension mismatch handled at distance function level
         // The exact behavior depends on the distance function implementation
+    }
+}
+
+// Implement the Index trait for PQFlashIndex
+impl super::Index for PQFlashIndex {
+    fn search(&self, query: &[f32], k: usize) -> Result<Vec<(usize, f32)>> {
+        // Use default search parameters
+        let search_list_size = k * 10; // Reasonable default
+        let (results, _stats) = self.search(query, k, search_list_size)?;
+        // Convert u32 to usize
+        Ok(results.into_iter().map(|(id, dist)| (id as usize, dist)).collect())
+    }
+    
+    fn size(&self) -> usize {
+        self.header.as_ref().map(|h| h.num_points as usize).unwrap_or(0)
+    }
+    
+    fn dimension(&self) -> usize {
+        self.header.as_ref().map(|h| h.data_dim as usize).unwrap_or(0)
+    }
+    
+    fn metric(&self) -> Distance {
+        self.header.as_ref().map(|h| h.metric).unwrap_or(Distance::L2)
+    }
+    
+    fn save(&self, path: &str) -> Result<()> {
+        // PQFlashIndex is already saved to disk during build
+        // This could copy the existing files to a new location if needed
+        Ok(())
+    }
+    
+    fn stats(&self) -> super::IndexStats {
+        let header = self.header.as_ref();
+        super::IndexStats {
+            num_vectors: self.size(),
+            dimension: self.dimension(),
+            metric: self.metric(),
+            memory_usage_bytes: self.memory_usage_estimate(),
+            graph_degree_avg: header.map(|h| h.max_degree as f32).unwrap_or(0.0),
+            graph_degree_max: header.map(|h| h.max_degree as usize).unwrap_or(0),
+        }
+    }
+    
+    fn memory_usage_bytes(&self) -> usize {
+        self.memory_usage_estimate()
     }
 }

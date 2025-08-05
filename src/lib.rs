@@ -38,6 +38,12 @@ pub mod search;
 /// Command-line interface modules
 pub mod cli;
 
+/// Microsoft DiskANN C++ API compatibility layer
+pub mod compat;
+
+/// Microsoft DiskANN Rust API compatibility layer (external API)
+pub mod external;
+
 /// CLI configuration structure
 #[derive(Debug)]
 pub struct Cli {

@@ -39,7 +39,7 @@ where
     let mut pruned = Vec::with_capacity(max_degree);
     let mut pruned_set = HashSet::new();
     
-    for (candidate_id, candidate_dist) in neighbors {
+    for (candidate_id, candidate_dist) in &neighbors {
         if pruned.len() >= max_degree {
             break;
         }
@@ -48,20 +48,20 @@ where
         let mut should_prune = false;
         
         for &selected_id in &pruned {
-            let candidate_vec: &[f32] = &vectors[candidate_id];
-            let selected_vec: &[f32] = &vectors[selected_id];
+            let candidate_vec: &Vec<f32> = &vectors[*candidate_id];
+            let selected_vec: &Vec<f32> = &vectors[selected_id];
             let dist_to_selected = distance_fn(candidate_vec, selected_vec)?;
             
             // Prune if candidate is closer to a selected neighbor than to vertex
-            if dist_to_selected < candidate_dist * alpha {
+            if dist_to_selected < *candidate_dist * alpha {
                 should_prune = true;
                 break;
             }
         }
         
         if !should_prune {
-            pruned.push(candidate_id);
-            pruned_set.insert(candidate_id);
+            pruned.push(*candidate_id);
+            pruned_set.insert(*candidate_id);
         }
     }
     

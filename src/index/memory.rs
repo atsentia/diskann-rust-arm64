@@ -179,6 +179,18 @@ impl Index for MemoryIndex {
     fn metric(&self) -> Distance {
         self.metric
     }
+    
+    fn save(&self, path: &str) -> Result<()> {
+        self.save(path)
+    }
+    
+    fn stats(&self) -> IndexStats {
+        self.stats()
+    }
+    
+    fn memory_usage_bytes(&self) -> usize {
+        self.stats().memory_usage_bytes
+    }
 }
 
 /// Index statistics

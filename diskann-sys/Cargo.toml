@@ -1,0 +1,19 @@
+[package]
+name = "diskann-sys"
+version = "0.1.0"
+edition = "2021"
+authors = ["DiskANN Rust Contributors"]
+description = "FFI bindings to Microsoft DiskANN C++ library"
+license = "MIT"
+links = "diskann"
+
+[dependencies]
+
+[build-dependencies]
+bindgen = "0.69"
+cc = "1.0"
+cmake = "0.1"
+
+[features]
+default = []
+static = []  # Link statically instead of dynamically
