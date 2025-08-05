@@ -4,6 +4,7 @@
 
 pub mod vamana;
 pub mod vamana_fixed;
+pub mod vamana_optimized;
 pub mod search;
 pub mod prune;
 
