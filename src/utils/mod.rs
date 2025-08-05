@@ -2,6 +2,8 @@
 //!
 //! This module provides common utilities used throughout the library.
 
+pub mod metrics;
+
 use std::fs::File;
 use std::io::{BufReader, Read};
 use crate::Result;
