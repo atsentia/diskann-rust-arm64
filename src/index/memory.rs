@@ -2,9 +2,8 @@
 //!
 //! This module provides an in-memory index using the Vamana graph algorithm.
 
-use crate::{Distance, Index, Result, Error};
+use crate::{Distance, Index, Result};
 use crate::graph::VamanaGraph;
-use parking_lot::RwLock;
 use std::sync::Arc;
 
 /// In-memory index implementation

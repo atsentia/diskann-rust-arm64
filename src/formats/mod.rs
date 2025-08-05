@@ -59,9 +59,7 @@ pub fn read_fvecs<P: AsRef<Path>>(path: P) -> Result<(Vec<Vec<f32>>, usize)> {
         // Verify consistent dimension
         if let Some(expected_dim) = dimension {
             if dim != expected_dim {
-                return Err(Error::InvalidParameter(
-                    format!("Inconsistent dimensions: {} vs {}", dim, expected_dim)
-                ));
+                return Err(anyhow::anyhow!("Inconsistent dimensions: {} vs {}", dim, expected_dim));
             }
         } else {
             dimension = Some(dim);
@@ -92,10 +90,7 @@ pub fn write_fvecs<P: AsRef<Path>>(path: P, vectors: &[Vec<f32>]) -> Result<()> 
     
     for vector in vectors {
         if vector.len() != dimension {
-            return Err(Error::DimensionMismatch {
-                expected: dimension,
-                actual: vector.len(),
-            });
+            return Err(anyhow::anyhow!("Dimension mismatch: expected {}, got {}", dimension, vector.len()));
         }
         
         // Write dimension
@@ -129,9 +124,7 @@ pub fn read_bvecs<P: AsRef<Path>>(path: P) -> Result<(Vec<Vec<u8>>, usize)> {
         // Verify consistent dimension
         if let Some(expected_dim) = dimension {
             if dim != expected_dim {
-                return Err(Error::InvalidParameter(
-                    format!("Inconsistent dimensions: {} vs {}", dim, expected_dim)
-                ));
+                return Err(anyhow::anyhow!("Inconsistent dimensions: {} vs {}", dim, expected_dim));
             }
         } else {
             dimension = Some(dim);
@@ -160,10 +153,7 @@ pub fn write_bvecs<P: AsRef<Path>>(path: P, vectors: &[Vec<u8>]) -> Result<()> {
     
     for vector in vectors {
         if vector.len() != dimension {
-            return Err(Error::DimensionMismatch {
-                expected: dimension,
-                actual: vector.len(),
-            });
+            return Err(anyhow::anyhow!("Dimension mismatch: expected {}, got {}", dimension, vector.len()));
         }
         
         // Write dimension
@@ -195,9 +185,7 @@ pub fn read_ivecs<P: AsRef<Path>>(path: P) -> Result<(Vec<Vec<i32>>, usize)> {
         // Verify consistent dimension
         if let Some(expected_dim) = dimension {
             if dim != expected_dim {
-                return Err(Error::InvalidParameter(
-                    format!("Inconsistent dimensions: {} vs {}", dim, expected_dim)
-                ));
+                return Err(anyhow::anyhow!("Inconsistent dimensions: {} vs {}", dim, expected_dim));
             }
         } else {
             dimension = Some(dim);
@@ -228,10 +216,7 @@ pub fn write_ivecs<P: AsRef<Path>>(path: P, vectors: &[Vec<i32>]) -> Result<()> 
     
     for vector in vectors {
         if vector.len() != dimension {
-            return Err(Error::DimensionMismatch {
-                expected: dimension,
-                actual: vector.len(),
-            });
+            return Err(anyhow::anyhow!("Dimension mismatch: expected {}, got {}", dimension, vector.len()));
         }
         
         // Write dimension
@@ -285,10 +270,7 @@ impl BinaryHeader {
     
     pub fn from_bytes(bytes: &[u8]) -> Result<Self> {
         if bytes.len() < Self::SIZE {
-            return Err(Error::Io(std::io::Error::new(
-                std::io::ErrorKind::UnexpectedEof,
-                "Invalid header size"
-            )));
+            return Err(anyhow::anyhow!("Invalid header size").into());
         }
         
         let mut cursor = &bytes[..Self::SIZE];
@@ -326,7 +308,7 @@ pub fn read_binary<P: AsRef<Path>>(path: P) -> Result<(Vec<Vec<f32>>, usize, Vec
         1 => VectorType::Float16,
         2 => VectorType::Int8,
         3 => VectorType::UInt8,
-        _ => return Err(Error::InvalidParameter("Unknown vector type".to_owned()).into()),
+        _ => return Err(anyhow::anyhow!("Unknown vector type")),
     };
     
     // Read vectors based on type
@@ -438,7 +420,7 @@ pub fn convert_format<P1: AsRef<Path>, P2: AsRef<Path>>(
 ) -> Result<()> {
     // Detect input format
     let input_format = VectorFormat::from_path(&input_path)
-        .ok_or_else(|| Error::InvalidParameter("Unknown input format".to_owned()).into())?;
+        .ok_or_else(|| anyhow::anyhow!("Unknown input format"))?;
     
     // Read vectors
     let (vectors, _) = match input_format {

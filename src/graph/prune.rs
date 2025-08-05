@@ -2,7 +2,7 @@
 //!
 //! This module implements the RobustPrune algorithm and related pruning strategies.
 
-use crate::{Result, Error};
+use crate::Result;
 use std::collections::HashSet;
 
 /// RobustPrune algorithm for edge selection
@@ -48,7 +48,10 @@ where
         let mut should_prune = false;
         
         for &selected_id in &pruned {
-            let dist_to_selected = distance_fn(&vectors[candidate_id], &vectors[selected_id])?;
+            let dist_to_selected = distance_fn(
+                &vectors[candidate_id],
+                &vectors[selected_id]
+            )?;
             
             // Prune if candidate is closer to a selected neighbor than to vertex
             if dist_to_selected < candidate_dist * alpha {

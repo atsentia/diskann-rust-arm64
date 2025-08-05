@@ -178,10 +178,10 @@ impl Vector {
                 Vector::Float16(data.iter().map(|&x| f16::from_f32(x)).collect())
             }
             VectorType::Int8 => {
-                Vector::Int8(data.iter().map(|&x| i8::from_f32(x)).collect())
+                Vector::Int8(data.iter().map(|&x| <i8 as VectorElement>::from_f32(x)).collect())
             }
             VectorType::UInt8 => {
-                Vector::UInt8(data.iter().map(|&x| u8::from_f32(x)).collect())
+                Vector::UInt8(data.iter().map(|&x| <u8 as VectorElement>::from_f32(x)).collect())
             }
         }
     }
@@ -190,7 +190,7 @@ impl Vector {
     pub fn as_bytes(&self) -> &[u8] {
         match self {
             Vector::Float32(v) => bytemuck::cast_slice(v),
-            Vector::Float16(v) => bytemuck::cast_slice(v),
+            Vector::Float16(v) => unsafe { std::slice::from_raw_parts(v.as_ptr() as *const u8, v.len() * 2) },
             Vector::Int8(v) => bytemuck::cast_slice(v),
             Vector::UInt8(v) => bytemuck::cast_slice(v),
         }
@@ -250,7 +250,7 @@ pub mod quantize {
         let params = ScaleParams::compute(min, max, -127.0, 127.0);
         
         let quantized: Vec<i8> = data.iter()
-            .map(|&x| i8::from_f32(params.apply(x)))
+            .map(|&x| <i8 as VectorElement>::from_f32(params.apply(x)))
             .collect();
         
         (quantized, params)
@@ -266,7 +266,7 @@ pub mod quantize {
         let params = ScaleParams::compute(min, max, 0.0, 255.0);
         
         let quantized: Vec<u8> = data.iter()
-            .map(|&x| u8::from_f32(params.apply(x)))
+            .map(|&x| <u8 as VectorElement>::from_f32(params.apply(x)))
             .collect();
         
         (quantized, params)

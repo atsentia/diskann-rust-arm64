@@ -224,7 +224,10 @@ impl VamanaGraph {
         let mut neighbors: Vec<Neighbor> = candidates
             .iter()
             .map(|&id| {
-                let dist = self.distance_fn.distance(&vectors[vertex_id], &vectors[id]).unwrap();
+                let dist = self.distance_fn.distance(
+                    &vectors[vertex_id],
+                    &vectors[id]
+                ).unwrap();
                 Neighbor { id, distance: dist }
             })
             .collect();
@@ -245,7 +248,10 @@ impl VamanaGraph {
             let mut should_prune = false;
             
             for &selected_id in &pruned {
-                let dist_to_selected = self.distance_fn.distance(&vectors[neighbor.id], &vectors[selected_id])?;
+                let dist_to_selected = self.distance_fn.distance(
+                    &vectors[neighbor.id],
+                    &vectors[selected_id]
+                )?;
                 if dist_to_selected < neighbor.distance {
                     should_prune = true;
                     break;
@@ -549,8 +555,8 @@ impl VamanaGraph {
             
             for &selected_id in &pruned {
                 if selected_id < vectors.len() {
-                    if let Some(selected_vec) = &vectors[selected_id] {
-                        if let Some(neighbor_vec) = &vectors[neighbor.id] {
+                    if let Some(selected_vec) = (vectors[selected_id]).as_ref() {
+                        if let Some(neighbor_vec) = vectors[neighbor.id].as_ref() {
                             let dist_to_selected = self.distance_fn.distance(neighbor_vec, selected_vec)?;
                             if dist_to_selected < neighbor.distance {
                                 should_prune = true;

@@ -41,7 +41,7 @@ impl MmapReader {
             return Err(Error::Io(std::io::Error::new(
                 std::io::ErrorKind::UnexpectedEof,
                 "Read beyond end of file"
-            )));
+            )).into());
         }
         
         buf.copy_from_slice(&self.mmap[offset..offset + buf.len()]);
@@ -55,7 +55,7 @@ impl MmapReader {
             return Err(Error::Io(std::io::Error::new(
                 std::io::ErrorKind::UnexpectedEof,
                 "Slice beyond end of file"
-            )));
+            )).into());
         }
         
         Ok(&self.mmap[offset..offset + len])
@@ -240,7 +240,7 @@ impl BufferedReader {
             return Err(Error::Io(std::io::Error::new(
                 std::io::ErrorKind::UnexpectedEof,
                 "End of file"
-            )));
+            )).into());
         }
         
         self.reader.read_at(self.file_pos, &mut self.buffer[..to_read])?;

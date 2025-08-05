@@ -51,7 +51,7 @@ impl IndexHeader {
             return Err(Error::Io(std::io::Error::new(
                 std::io::ErrorKind::InvalidData,
                 "Invalid header size"
-            )));
+            )).into());
         }
         
         let header: Self = unsafe { std::ptr::read(bytes.as_ptr() as *const Self) };
@@ -60,14 +60,14 @@ impl IndexHeader {
             return Err(Error::Io(std::io::Error::new(
                 std::io::ErrorKind::InvalidData,
                 "Invalid magic number"
-            )));
+            )).into());
         }
         
         if header.version != Self::VERSION {
             return Err(Error::Io(std::io::Error::new(
                 std::io::ErrorKind::InvalidData,
                 format!("Unsupported version: {}", header.version)
-            )));
+            )).into());
         }
         
         Ok(header)
