@@ -1,0 +1,80 @@
+[package]
+name = "diskann"
+version = "0.1.0"
+edition = "2021"
+authors = ["DiskANN Rust Contributors"]
+description = "Pure Rust implementation of DiskANN with ARM64 NEON optimizations"
+repository = "https://github.com/yourusername/diskann-rust-neon"
+license = "MIT"
+keywords = ["vector-search", "ann", "nearest-neighbor", "neon", "simd"]
+categories = ["algorithms", "data-structures", "science"]
+
+[features]
+default = ["parallel", "neon"]
+neon = []  # ARM64 NEON support
+avx2 = []  # x86-64 AVX2 support
+avx512 = []  # x86-64 AVX-512 support
+parallel = ["rayon", "num_cpus"]
+python = ["pyo3"]
+c-api = []
+
+[dependencies]
+# Core dependencies
+anyhow = "1.0"
+thiserror = "1.0"
+log = "0.4"
+env_logger = "0.11"
+
+# Math and SIMD
+num-traits = "0.2"
+bytemuck = "1.14"
+half = "2.3"
+
+# Parallelism
+rayon = { version = "1.8", optional = true }
+num_cpus = { version = "1.16", optional = true }
+crossbeam-channel = "0.5"
+parking_lot = "0.12"
+
+# I/O and serialization
+memmap2 = "0.9"
+bincode = "1.3"
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1.35", features = ["rt-multi-thread", "io-util", "fs"] }
+
+# Python bindings
+pyo3 = { version = "0.20", features = ["extension-module"], optional = true }
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+proptest = "1.4"
+approx = "0.5"
+tempfile = "3.8"
+rand = "0.8"
+rand_xoshiro = "0.6"
+
+[build-dependencies]
+cc = "1.0"
+
+[[bench]]
+name = "distance"
+harness = false
+
+[[bench]]
+name = "graph"
+harness = false
+
+[[bench]]
+name = "index"
+harness = false
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+opt-level = 3
+
+[profile.bench]
+lto = "fat"
+codegen-units = 1
+opt-level = 3
+debug = true
