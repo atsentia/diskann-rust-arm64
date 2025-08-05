@@ -7,7 +7,7 @@ use diskann::*;
 use diskann::index::disk::{PQFlashIndex, PQFlashConfig, PQParams};
 use std::time::{Duration, Instant};
 use std::fs::{File, create_dir_all};
-use std::io::Write;
+use std::io::{Write, stdout};
 use chrono::Local;
 use rand::Rng;
 use sysinfo::System;
@@ -151,24 +151,36 @@ fn run_single_benchmark(test: &ScalabilityTest, log_file: &mut File) -> Result<B
     let start_total = Instant::now();
     
     writeln!(log_file, "=== {} Test ({} vectors) ===", test.name, test.num_vectors)?;
+    log_file.flush()?;
     
     // Step 1: Generate dataset
     println!("  🔢 Generating {} vectors ({} dimensions)...", test.num_vectors, DIMENSION);
+    writeln!(log_file, "Step 1: Vector Generation Started")?;
+    log_file.flush()?;
+    
     let vector_start = Instant::now();
     let vectors = generate_random_vectors(test.num_vectors, DIMENSION);
     let queries = generate_random_vectors(QUERY_COUNT, DIMENSION);
     let vector_time = vector_start.elapsed();
-    println!("     Generated in {:.2}s ({:.0} vectors/sec)", 
-             vector_time.as_secs_f64(), 
-             test.num_vectors as f64 / vector_time.as_secs_f64());
+    
+    let generation_rate = test.num_vectors as f64 / vector_time.as_secs_f64();
+    println!("     ✅ Generated in {:.2}s ({:.0} vectors/sec)", vector_time.as_secs_f64(), generation_rate);
+    writeln!(log_file, "Vector generation: {:.2}s ({:.0} vectors/sec)", vector_time.as_secs_f64(), generation_rate)?;
+    log_file.flush()?;
     
     // Step 2: Build PQ Flash Index
     println!("  🏗️  Building PQ Flash Index...");
+    writeln!(log_file, "Step 2: Index Build Started")?;
+    log_file.flush()?;
+    
     let build_start = Instant::now();
     let memory_before = get_memory_usage();
     
     let config = create_pq_config(test.num_vectors);
     let index_path = format!("{}/test_{}_{}.idx", OUTPUT_DIR, test.name.to_lowercase(), test.num_vectors);
+    
+    println!("     📋 Config: max_degree={}, search_list_size={}, pq_chunks={}", 
+             config.max_degree, config.search_list_size, config.pq_params.num_chunks);
     
     let index = PQFlashIndex::build_from_vectors(&index_path, vectors, config)?;
     
@@ -176,33 +188,52 @@ fn run_single_benchmark(test: &ScalabilityTest, log_file: &mut File) -> Result<B
     let memory_after = get_memory_usage();
     let memory_usage_build = (memory_after - memory_before) as f64 / (1024.0 * 1024.0);
     
-    println!("     Built in {:.2}s ({:.0} vectors/sec)", 
-             build_time.as_secs_f64(),
-             test.num_vectors as f64 / build_time.as_secs_f64());
+    let build_rate = test.num_vectors as f64 / build_time.as_secs_f64();
+    println!("     ✅ Built in {:.2}s ({:.0} vectors/sec)", build_time.as_secs_f64(), build_rate);
+    writeln!(log_file, "Index build: {:.2}s ({:.0} vectors/sec)", build_time.as_secs_f64(), build_rate)?;
+    log_file.flush()?;
     
-    // Step 3: Get index statistics
-    let index_file_size = std::fs::metadata(&index_path)?.len() as f64 / (1024.0 * 1024.0);
-    let raw_size = (test.num_vectors * DIMENSION * 4) as f64 / (1024.0 * 1024.0);
-    let compression_ratio = raw_size / index_file_size;
+    // Step 3: Analyze index files and statistics
+    println!("  📊 Analyzing index files...");
+    let file_stats = analyze_index_files(&index_path, test.num_vectors)?;
+    print_file_statistics(&file_stats);
+    log_file_statistics(&file_stats, log_file)?;
     
-    println!("     Index size: {:.1} MB (compression: {:.1}x)", index_file_size, compression_ratio);
+    let compression_ratio = file_stats.raw_size_mb / file_stats.total_size_mb;
+    println!("     💾 Total size: {:.1} MB (compression: {:.1}x)", file_stats.total_size_mb, compression_ratio);
     
     // Step 4: Search benchmark
     println!("  🔍 Running search benchmark ({} queries)...", QUERY_COUNT);
+    writeln!(log_file, "Step 4: Search Benchmark Started")?;
+    log_file.flush()?;
+    
     let search_start = Instant::now();
     let memory_search_before = get_memory_usage();
     
     let mut latencies = Vec::new();
     let mut total_results = 0;
+    let progress_interval = QUERY_COUNT / 10; // Update every 10%
     
-    for query in &queries {
+    println!("     🎯 Progress: [          ] 0%");
+    
+    for (i, query) in queries.iter().enumerate() {
         let query_start = Instant::now();
         let (results, _stats) = index.search(query, 10, 50)?; // k=10, search_list_size=50
         let query_time = query_start.elapsed();
         
         latencies.push(query_time.as_micros() as f64);
         total_results += results.len();
+        
+        // Show progress every 10%
+        if progress_interval > 0 && (i + 1) % progress_interval == 0 {
+            let progress = ((i + 1) * 100) / QUERY_COUNT;
+            let bar = "█".repeat(progress / 10) + &" ".repeat(10 - progress / 10);
+            print!("\r     🎯 Progress: [{}] {}%", bar, progress);
+            stdout().flush().unwrap();
+        }
     }
+    
+    println!("\r     ✅ Completed {} queries                    ", QUERY_COUNT);
     
     let search_time = search_start.elapsed();
     let memory_search_after = get_memory_usage();
@@ -227,7 +258,7 @@ fn run_single_benchmark(test: &ScalabilityTest, log_file: &mut File) -> Result<B
         build_time,
         vectors_per_sec_build: test.num_vectors as f64 / build_time.as_secs_f64(),
         memory_usage_build_mb: memory_usage_build,
-        index_file_size_mb: index_file_size,
+        index_file_size_mb: file_stats.total_size_mb,
         compression_ratio,
         search_time,
         qps,
@@ -336,6 +367,86 @@ fn estimate_benchmark_time(test: &ScalabilityTest, history: &[(usize, Duration)]
     let estimated_seconds = last_duration.as_secs_f64() * scale_factor;
     
     Some(estimated_seconds / 60.0) // Return in minutes
+}
+
+#[derive(Debug)]
+struct IndexFileStats {
+    index_file_size_mb: f64,
+    pq_file_size_mb: f64,
+    reorder_file_size_mb: f64,
+    total_size_mb: f64,
+    raw_size_mb: f64,
+    num_vectors: usize,
+    exists_reorder: bool,
+}
+
+fn analyze_index_files(index_path: &str, num_vectors: usize) -> Result<IndexFileStats> {
+    let index_path = std::path::Path::new(index_path);
+    let prefix = index_path.with_extension("");
+    
+    // Check all possible index files
+    let index_file = prefix.with_extension("diskann");
+    let pq_file = prefix.with_extension("pq_compressed.bin");
+    let reorder_file = prefix.with_extension("reorder_data.bin");
+    
+    let index_size = if index_file.exists() {
+        std::fs::metadata(&index_file)?.len() as f64 / (1024.0 * 1024.0)
+    } else {
+        0.0
+    };
+    
+    let pq_size = if pq_file.exists() {
+        std::fs::metadata(&pq_file)?.len() as f64 / (1024.0 * 1024.0)
+    } else {
+        0.0
+    };
+    
+    let reorder_size = if reorder_file.exists() {
+        std::fs::metadata(&reorder_file)?.len() as f64 / (1024.0 * 1024.0)
+    } else {
+        0.0
+    };
+    
+    let total_size = index_size + pq_size + reorder_size;
+    let raw_size = (num_vectors * DIMENSION * 4) as f64 / (1024.0 * 1024.0); // 4 bytes per float
+    
+    Ok(IndexFileStats {
+        index_file_size_mb: index_size,
+        pq_file_size_mb: pq_size,
+        reorder_file_size_mb: reorder_size,
+        total_size_mb: total_size,
+        raw_size_mb: raw_size,
+        num_vectors,
+        exists_reorder: reorder_file.exists(),
+    })
+}
+
+fn print_file_statistics(stats: &IndexFileStats) {
+    println!("     📄 File breakdown:");
+    if stats.index_file_size_mb > 0.0 {
+        println!("       - Index: {:.2} MB", stats.index_file_size_mb);
+    }
+    if stats.pq_file_size_mb > 0.0 {
+        println!("       - PQ compressed: {:.2} MB", stats.pq_file_size_mb);
+    }
+    if stats.reorder_file_size_mb > 0.0 {
+        println!("       - Reorder data: {:.2} MB", stats.reorder_file_size_mb);
+    }
+    println!("       - Raw vectors: {:.2} MB (theoretical)", stats.raw_size_mb);
+    println!("       - Bytes per vector: {:.1}", (stats.total_size_mb * 1024.0 * 1024.0) / stats.num_vectors as f64);
+}
+
+fn log_file_statistics(stats: &IndexFileStats, log_file: &mut File) -> Result<()> {
+    writeln!(log_file, "File Statistics:")?;
+    writeln!(log_file, "  Index file: {:.2} MB", stats.index_file_size_mb)?;
+    writeln!(log_file, "  PQ file: {:.2} MB", stats.pq_file_size_mb)?;
+    writeln!(log_file, "  Reorder file: {:.2} MB", stats.reorder_file_size_mb)?;
+    writeln!(log_file, "  Total size: {:.2} MB", stats.total_size_mb)?;
+    writeln!(log_file, "  Raw size: {:.2} MB", stats.raw_size_mb)?;
+    writeln!(log_file, "  Compression ratio: {:.1}x", stats.raw_size_mb / stats.total_size_mb)?;
+    writeln!(log_file, "  Bytes per vector: {:.1}", (stats.total_size_mb * 1024.0 * 1024.0) / stats.num_vectors as f64)?;
+    log_file.flush()?;
+    Ok(())
 }
 
 fn generate_scalability_analysis(results: &[BenchmarkResult], log_file: &mut File) -> Result<()> {
