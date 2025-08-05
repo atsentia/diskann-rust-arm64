@@ -4,14 +4,24 @@
 
 use crate::{Distance, Index, Result};
 use crate::graph::VamanaGraph;
+use crate::graph::vamana::SerializableVamanaGraph;
 use std::sync::Arc;
+use std::sync::atomic::Ordering as AtomicOrdering;
 use std::path::Path;
 use std::fs::File;
 use std::io::{BufReader, BufWriter};
 use serde::{Serialize, Deserialize};
 
-/// In-memory index implementation
+/// Serializable wrapper for MemoryIndex
 #[derive(Serialize, Deserialize)]
+struct SerializableMemoryIndex {
+    graph: SerializableVamanaGraph,
+    vectors: Vec<Vec<f32>>,
+    dimension: usize,
+    metric: Distance,
+}
+
+/// In-memory index implementation
 pub struct MemoryIndex {
     /// The underlying graph
     graph: VamanaGraph,
@@ -112,9 +122,23 @@ Err(anyhow::anyhow!("Dynamic deletion not yet implemented"))
     
     /// Save index to file
     pub fn save<P: AsRef<Path>>(&self, path: P) -> Result<()> {
+        // Manually extract graph data for serialization
+        // Access the private fields of VamanaGraph through serialization
+        let serialized_graph = bincode::serialize(&self.graph)?;
+        let deserialized: SerializableVamanaGraph = bincode::deserialize(&serialized_graph)?;
+        
+        let serializable_graph = deserialized;
+        
+        let serializable = SerializableMemoryIndex {
+            graph: serializable_graph,
+            vectors: (*self.vectors).clone(),
+            dimension: self.dimension,
+            metric: self.metric,
+        };
+        
         let file = File::create(path)?;
         let writer = BufWriter::new(file);
-        bincode::serialize_into(writer, self)?;
+        bincode::serialize_into(writer, &serializable)?;
         Ok(())
     }
     
@@ -122,8 +146,17 @@ Err(anyhow::anyhow!("Dynamic deletion not yet implemented"))
     pub fn load<P: AsRef<Path>>(path: P) -> Result<Self> {
         let file = File::open(path)?;
         let reader = BufReader::new(file);
-        let index = bincode::deserialize_from(reader)?;
-        Ok(index)
+        let serializable: SerializableMemoryIndex = bincode::deserialize_from(reader)?;
+        
+        // Reconstruct VamanaGraph from serializable data
+        let graph = VamanaGraph::from_serializable(serializable.graph);
+        
+        Ok(MemoryIndex {
+            graph,
+            vectors: Arc::new(serializable.vectors),
+            dimension: serializable.dimension,
+            metric: serializable.metric,
+        })
     }
 }
 

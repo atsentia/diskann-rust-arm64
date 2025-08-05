@@ -67,7 +67,7 @@ pub struct BuildArgs {
     pub threads: usize,
 }
 
-pub fn run(args: BuildArgs, cli: &crate::Cli) -> diskann::Result<()> {
+pub fn run(args: BuildArgs, cli: &crate::Cli) -> crate::Result<()> {
     let start_time = Instant::now();
     
     // Parse distance metric
@@ -128,16 +128,16 @@ pub fn run(args: BuildArgs, cli: &crate::Cli) -> diskann::Result<()> {
     Ok(())
 }
 
-fn load_vectors(args: &BuildArgs) -> diskann::Result<(Vec<Vec<f32>>, usize)> {
+fn load_vectors(args: &BuildArgs) -> crate::Result<(Vec<Vec<f32>>, usize)> {
     let format = detect_format(&args.input, &args.format)?;
     
     match format.as_str() {
         "fvecs" => {
-            let (vectors, dim) = diskann::formats::read_fvecs(&args.input)?;
+            let (vectors, dim) = crate::formats::read_fvecs(&args.input)?;
             Ok((vectors, dim))
         }
         "bvecs" => {
-            let (int_vectors, dim) = diskann::formats::read_bvecs(&args.input)?;
+            let (int_vectors, dim) = crate::formats::read_bvecs(&args.input)?;
             // Convert to float vectors
             let vectors = int_vectors.into_iter()
                 .map(|v| v.into_iter().map(|x| x as f32).collect())
@@ -145,7 +145,7 @@ fn load_vectors(args: &BuildArgs) -> diskann::Result<(Vec<Vec<f32>>, usize)> {
             Ok((vectors, dim))
         }
         "ivecs" => {
-            let (int_vectors, dim) = diskann::formats::read_ivecs(&args.input)?;
+            let (int_vectors, dim) = crate::formats::read_ivecs(&args.input)?;
             // Convert to float vectors
             let vectors = int_vectors.into_iter()
                 .map(|v| v.into_iter().map(|x| x as f32).collect())
@@ -155,14 +155,14 @@ fn load_vectors(args: &BuildArgs) -> diskann::Result<(Vec<Vec<f32>>, usize)> {
         "bin" => {
             let dimension = args.dimension
                 .ok_or_else(|| anyhow::anyhow!("Dimension required for binary format"))?;
-            let vectors = diskann::formats::read_binary_vectors(&args.input, dimension)?;
+            let vectors = crate::formats::read_binary_vectors(&args.input, dimension)?;
             Ok((vectors, dimension))
         }
         _ => Err(anyhow::anyhow!("Unsupported format: {}", format)),
     }
 }
 
-fn detect_format(path: &PathBuf, format_hint: &str) -> diskann::Result<String> {
+fn detect_format(path: &PathBuf, format_hint: &str) -> crate::Result<String> {
     if format_hint != "auto" {
         return Ok(format_hint.to_string());
     }
@@ -181,7 +181,7 @@ fn detect_format(path: &PathBuf, format_hint: &str) -> diskann::Result<String> {
     }
 }
 
-fn load_labels(path: &PathBuf, expected_count: usize) -> diskann::Result<Vec<Vec<u32>>> {
+fn load_labels(path: &PathBuf, expected_count: usize) -> crate::Result<Vec<Vec<u32>>> {
     use std::fs::File;
     use std::io::{BufRead, BufReader};
     
@@ -199,17 +199,16 @@ fn load_labels(path: &PathBuf, expected_count: usize) -> diskann::Result<Vec<Vec
         }
         
         // Parse comma-separated labels
-        let vector_labels: Result<Vec<u32>, _> = line
-            .split(',')
-            .map(|s| s.trim().parse::<u32>())
-            .collect();
-        
-        match vector_labels {
-            Ok(parsed_labels) => labels.push(parsed_labels),
-            Err(e) => return Err(anyhow::anyhow!(
-                "Failed to parse labels at line {}: {}", line_num + 1, e
-            )),
+        let mut parsed_labels = Vec::new();
+        for label_str in line.split(',') {
+            match label_str.trim().parse::<u32>() {
+                Ok(label) => parsed_labels.push(label),
+                Err(e) => return Err(anyhow::anyhow!(
+                    "Failed to parse label '{}' at line {}: {}", label_str.trim(), line_num + 1, e
+                )),
+            }
         }
+        labels.push(parsed_labels);
     }
     
     if labels.len() != expected_count {
@@ -228,7 +227,7 @@ fn build_standard_index(
     args: &BuildArgs,
     _labels: Option<Vec<Vec<u32>>>,
     cli: &crate::Cli,
-) -> diskann::Result<()> {
+) -> crate::Result<()> {
     if !cli.no_progress {
         println!("🏗️  Building standard Vamana index...");
     }
@@ -278,7 +277,7 @@ fn build_pq_index(
     args: &BuildArgs,
     _labels: Option<Vec<Vec<u32>>>,
     cli: &crate::Cli,
-) -> diskann::Result<()> {
+) -> crate::Result<()> {
     if !cli.no_progress {
         println!("🗜️  Building PQ-compressed index...");
         println!("  Subspaces: {}", args.pq_subspaces);

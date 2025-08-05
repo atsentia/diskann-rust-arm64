@@ -109,7 +109,7 @@ pub struct RecallResults {
     pub recall_at_1: Vec<f64>,
 }
 
-pub fn run(args: BenchmarkArgs, cli: &crate::Cli) -> diskann::Result<()> {
+pub fn run(args: BenchmarkArgs, cli: &crate::Cli) -> crate::Result<()> {
     if !cli.no_progress {
         println!("{}", style("📊 DiskANN Benchmarking Suite").bold().green());
         println!("  Index: {}", args.index.display());
@@ -119,9 +119,9 @@ pub fn run(args: BenchmarkArgs, cli: &crate::Cli) -> diskann::Result<()> {
     }
     
     // Parse search list sizes
-    let search_list_sizes: Result<Vec<usize>, _> = args.search_list_sizes
+    let search_list_sizes: Result<Vec<usize>> = args.search_list_sizes
         .split(',')
-        .map(|s| s.trim().parse())
+        .map(|s| s.trim().parse::<usize>().map_err(|e| anyhow::anyhow!("Failed to parse '{}': {}", s, e)))
         .collect();
     let search_list_sizes = search_list_sizes?;
     
@@ -229,9 +229,9 @@ pub fn run(args: BenchmarkArgs, cli: &crate::Cli) -> diskann::Result<()> {
     Ok(())
 }
 
-fn load_queries(args: &BenchmarkArgs) -> diskann::Result<(Vec<Vec<f32>>, usize)> {
+fn load_queries(args: &BenchmarkArgs) -> crate::Result<(Vec<Vec<f32>>, usize)> {
     // Reuse logic from search.rs
-    crate::search::load_queries(&crate::search::SearchArgs {
+    crate::cli::search::load_queries(&crate::cli::search::SearchArgs {
         index: args.index.clone(),
         queries: args.queries.clone(),
         k: args.k,
@@ -251,7 +251,7 @@ fn load_ground_truth(
     path: &PathBuf, 
     num_queries: usize, 
     k: usize
-) -> diskann::Result<Vec<Vec<usize>>> {
+) -> crate::Result<Vec<Vec<usize>>> {
     // Assume ground truth is in ivecs format (standard for benchmarks)
     let (gt_data, gt_k) = crate::formats::read_ivecs(path)?;
     
@@ -490,7 +490,7 @@ fn display_results(results: &BenchmarkResults, cli: &crate::Cli) {
     }
 }
 
-fn save_results(results: &BenchmarkResults, output_path: &PathBuf) -> diskann::Result<()> {
+fn save_results(results: &BenchmarkResults, output_path: &PathBuf) -> crate::Result<()> {
     use std::fs::File;
     use std::io::BufWriter;
     

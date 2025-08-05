@@ -7,6 +7,11 @@ pub mod disk;
 pub mod builder;
 pub mod dynamic;
 
+// Re-export key types from sub-modules
+pub use disk::{PQFlashIndex, PQFlashConfig, QueryStats, DiskIndexStats};
+pub use memory::MemoryIndex;
+pub use dynamic::DynamicIndex;
+
 use crate::{Distance, Result};
 
 /// Trait for all index implementations

@@ -42,7 +42,7 @@ impl PartialOrd for Neighbor {
 
 /// Serializable representation of VamanaGraph
 #[derive(Serialize, Deserialize)]
-struct SerializableVamanaGraph {
+pub struct SerializableVamanaGraph {
     graph: Vec<Vec<usize>>,
     max_degree: usize,
     search_list_size: usize,
@@ -268,9 +268,9 @@ impl VamanaGraph {
             let mut should_prune = false;
             
             for &selected_id in &pruned {
-                let neighbor_slice: &[f32] = vectors[neighbor.id].as_slice();
-                let selected_slice: &[f32] = vectors[selected_id].as_slice();
-                let dist_to_selected = self.distance_fn.distance(neighbor_slice, selected_slice)?;
+                let neighbor_vec = &vectors[neighbor.id];
+                let selected_vec: &[f32] = vectors[selected_id].as_slice();
+                let dist_to_selected = self.distance_fn.distance(neighbor_vec, selected_vec)?;
                 if dist_to_selected < neighbor.distance {
                     should_prune = true;
                     break;
@@ -605,14 +605,12 @@ impl VamanaGraph {
             let mut should_prune = false;
             
             for &selected_id in &pruned {
-                if selected_id < vectors.len() {
-                    if let Some(selected_vec) = &vectors[selected_id] {
-                        if let Some(neighbor_vec) = &vectors[neighbor.id] {
-                            let dist_to_selected = self.distance_fn.distance(neighbor_vec, selected_vec)?;
-                            if dist_to_selected < neighbor.distance {
-                                should_prune = true;
-                                break;
-                            }
+                if let Some(selected_vec) = vectors.get(selected_id).and_then(|v: &Option<Vec<f32>>| v.as_ref()) {
+                    if let Some(neighbor_vec) = vectors.get(neighbor.id).and_then(|v| v.as_ref()) {
+                        let dist_to_selected = self.distance_fn.distance(neighbor_vec, selected_vec)?;
+                        if dist_to_selected < neighbor.distance {
+                            should_prune = true;
+                            break;
                         }
                     }
                 }
@@ -668,7 +666,14 @@ impl<'de> Deserialize<'de> for VamanaGraph {
         D: Deserializer<'de>,
     {
         let serializable = SerializableVamanaGraph::deserialize(deserializer)?;
-        Ok(VamanaGraph {
+        Ok(VamanaGraph::from_serializable(serializable))
+    }
+}
+
+impl VamanaGraph {
+    /// Create VamanaGraph from serializable representation
+    pub fn from_serializable(serializable: SerializableVamanaGraph) -> Self {
+        VamanaGraph {
             graph: Arc::new(RwLock::new(serializable.graph)),
             max_degree: serializable.max_degree,
             search_list_size: serializable.search_list_size,
@@ -678,7 +683,7 @@ impl<'de> Deserialize<'de> for VamanaGraph {
             distance_fn: create_distance_function(serializable.metric, serializable.dimension),
             metric: serializable.metric,
             dimension: serializable.dimension,
-        })
+        }
     }
 }
 

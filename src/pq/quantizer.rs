@@ -9,7 +9,7 @@ use crate::utils::aligned::AlignedVec;
 use std::collections::HashMap;
 
 /// Product Quantization parameters
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct PQParams {
     /// Number of subspaces (M)
     pub num_subspaces: usize,

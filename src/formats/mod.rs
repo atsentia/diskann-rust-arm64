@@ -412,6 +412,37 @@ pub fn write_binary<P: AsRef<Path>>(
     Ok(())
 }
 
+/// Read vectors from binary format (simplified version for CLI)
+pub fn read_binary_vectors<P: AsRef<Path>>(path: P, dimension: usize) -> Result<Vec<Vec<f32>>> {
+    let mut file = File::open(path)?;
+    let mut vectors = Vec::new();
+    
+    // Read vectors as raw f32 data (assuming float32 format)
+    let mut buffer = [0u8; 4];
+    loop {
+        let mut vector = Vec::with_capacity(dimension);
+        
+        for _ in 0..dimension {
+            match file.read_exact(&mut buffer) {
+                Ok(()) => {
+                    let value = f32::from_le_bytes(buffer);
+                    vector.push(value);
+                }
+                Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => {
+                    if vector.is_empty() {
+                        return Ok(vectors); // End of file
+                    } else {
+                        return Err(anyhow::anyhow!("Incomplete vector at end of file"));
+                    }
+                }
+                Err(e) => return Err(e.into()),
+            }
+        }
+        
+        vectors.push(vector);
+    }
+}
+
 /// Convert between vector formats
 pub fn convert_format<P1: AsRef<Path>, P2: AsRef<Path>>(
     input_path: P1,

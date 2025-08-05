@@ -49,7 +49,7 @@ pub struct InfoArgs {
     pub memory: bool,
 }
 
-pub fn run(args: InfoArgs, cli: &crate::Cli) -> diskann::Result<()> {
+pub fn run(args: InfoArgs, cli: &crate::Cli) -> crate::Result<()> {
     if !cli.no_progress {
         println!("{}", style("ℹ️  File Analysis").bold().blue());
         println!("  File: {}", args.input.display());
@@ -73,7 +73,7 @@ pub fn run(args: InfoArgs, cli: &crate::Cli) -> diskann::Result<()> {
     Ok(())
 }
 
-fn detect_format(path: &PathBuf, format_hint: &str) -> diskann::Result<String> {
+fn detect_format(path: &PathBuf, format_hint: &str) -> crate::Result<String> {
     if format_hint != "auto" {
         return Ok(format_hint.to_string());
     }
@@ -92,7 +92,7 @@ fn detect_format(path: &PathBuf, format_hint: &str) -> diskann::Result<String> {
     }
 }
 
-fn analyze_vectors(args: &InfoArgs, format: &str, cli: &crate::Cli) -> diskann::Result<()> {
+fn analyze_vectors(args: &InfoArgs, format: &str, cli: &crate::Cli) -> crate::Result<()> {
     // Load vectors
     let (vectors, dimension) = load_vectors(args, format)?;
     
@@ -137,21 +137,21 @@ fn analyze_vectors(args: &InfoArgs, format: &str, cli: &crate::Cli) -> diskann::
     Ok(())
 }
 
-fn load_vectors(args: &InfoArgs, format: &str) -> diskann::Result<(Vec<Vec<f32>>, usize)> {
+fn load_vectors(args: &InfoArgs, format: &str) -> crate::Result<(Vec<Vec<f32>>, usize)> {
     match format {
         "fvecs" => {
-            let (vectors, dim) = diskann::formats::read_fvecs(&args.input)?;
+            let (vectors, dim) = crate::formats::read_fvecs(&args.input)?;
             Ok((vectors, dim))
         }
         "bvecs" => {
-            let (int_vectors, dim) = diskann::formats::read_bvecs(&args.input)?;
+            let (int_vectors, dim) = crate::formats::read_bvecs(&args.input)?;
             let vectors = int_vectors.into_iter()
                 .map(|v| v.into_iter().map(|x| x as f32).collect())
                 .collect();
             Ok((vectors, dim))
         }
         "ivecs" => {
-            let (int_vectors, dim) = diskann::formats::read_ivecs(&args.input)?;
+            let (int_vectors, dim) = crate::formats::read_ivecs(&args.input)?;
             let vectors = int_vectors.into_iter()
                 .map(|v| v.into_iter().map(|x| x as f32).collect())
                 .collect();
@@ -160,14 +160,14 @@ fn load_vectors(args: &InfoArgs, format: &str) -> diskann::Result<(Vec<Vec<f32>>
         "bin" => {
             let dimension = args.dimension
                 .ok_or_else(|| anyhow::anyhow!("Dimension required for binary format"))?;
-            let vectors = diskann::formats::read_binary_vectors(&args.input, dimension)?;
+            let vectors = crate::formats::read_binary_vectors(&args.input, dimension)?;
             Ok((vectors, dimension))
         }
         _ => Err(anyhow::anyhow!("Unsupported format: {}", format)),
     }
 }
 
-fn format_file_size(path: &PathBuf) -> diskann::Result<String> {
+fn format_file_size(path: &PathBuf) -> crate::Result<String> {
     let metadata = std::fs::metadata(path)?;
     let size = metadata.len();
     
@@ -441,7 +441,7 @@ fn show_memory_usage(vectors: &[Vec<f32>], dimension: usize, cli: &crate::Cli) {
     }
 }
 
-fn analyze_index(args: &InfoArgs, cli: &crate::Cli) -> diskann::Result<()> {
+fn analyze_index(args: &InfoArgs, cli: &crate::Cli) -> crate::Result<()> {
     if !cli.no_progress {
         println!("📋 Index Analysis:");
         println!("  File: {}", args.input.display());
