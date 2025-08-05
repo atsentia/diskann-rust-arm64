@@ -9,12 +9,12 @@ use std::io::Write;
 use chrono::Local;
 use rand::Rng;
 
-const OUTPUT_DIR: &str = "examples/runs/macM2arm64";
+const OUTPUT_DIR: &str = "examples/runs/ampereARM64small";
 
 fn main() -> Result<()> {
     // Create timestamp for this run
     let timestamp = Local::now().format("%Y%m%d_%H%M%S");
-    println!("DiskANN Benchmark Suite - M2 ARM64");
+    println!("DiskANN Benchmark Suite - Ampere ARM64");
     println!("==================================");
     println!("Timestamp: {}", timestamp);
     println!("Results will be saved to: {}/", OUTPUT_DIR);
@@ -332,28 +332,27 @@ fn run_pq_benchmark(timestamp: &str) -> Result<()> {
     for (num_chunks, desc) in chunk_configs {
         writeln!(output, "{}", desc)?;
         
-        let pq_params = pq::PQParams {
-            num_chunks,
-            bits_per_chunk: 8,
-        };
+        let pq_params = pq::PQParams::new(num_chunks, 8); // 8 bits per subquantizer
         
         // Train PQ
         let train_start = Instant::now();
-        let pq = pq::ProductQuantizer::train(&vectors, pq_params, Distance::L2)?;
+        let mut pq = pq::ProductQuantizer::new(512, pq_params)?; // 512 dimensions
+        let _training_result = pq.train(&vectors)?;
         let train_time = train_start.elapsed();
         
         // Encode all vectors
         let encode_start = Instant::now();
-        let encoded: Vec<_> = vectors.iter()
+        let encoded: Result<Vec<_>, _> = vectors.iter()
             .map(|v| pq.encode(v))
             .collect();
+        let encoded = encoded?;
         let encode_time = encode_start.elapsed();
         
         // Test reconstruction error on sample
         let mut total_error = 0.0;
         for i in 0..100 {
             let original = &vectors[i];
-            let reconstructed = pq.decode(&encoded[i]);
+            let reconstructed = pq.decode(&encoded[i])?;
             let error: f32 = original.iter()
                 .zip(reconstructed.iter())
                 .map(|(a, b)| (a - b).powi(2))

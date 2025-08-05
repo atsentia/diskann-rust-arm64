@@ -326,27 +326,26 @@ fn benchmark_pq_compression(output: &mut File) -> Result<()> {
     for (num_chunks, desc) in chunk_configs {
         writeln!(output, "\n{} (compression: {}x)", desc, dim / num_chunks)?;
         
-        let pq_params = pq::PQParams {
-            num_chunks,
-            bits_per_chunk: 8,
-        };
+        let pq_params = pq::PQParams::new(num_chunks, 8); // 8 bits per subquantizer
         
         // Build PQ
         let start = Instant::now();
-        let pq = pq::ProductQuantizer::train(&vectors, pq_params, Distance::L2)?;
+        let mut pq = pq::ProductQuantizer::new(dimension, pq_params)?;
+        let _training_result = pq.train(&vectors)?;
         let train_time = start.elapsed();
         
         // Encode vectors
         let start = Instant::now();
-        let encoded: Vec<_> = vectors.iter()
+        let encoded: Result<Vec<_>, _> = vectors.iter()
             .map(|v| pq.encode(v))
             .collect();
+        let encoded = encoded?;
         let encode_time = start.elapsed();
         
         // Test reconstruction error
         let mut total_error = 0.0;
         for (original, encoded) in vectors.iter().zip(encoded.iter()).take(100) {
-            let reconstructed = pq.decode(encoded);
+            let reconstructed = pq.decode(encoded)?;
             let error: f32 = original.iter()
                 .zip(reconstructed.iter())
                 .map(|(a, b)| (a - b).powi(2))
