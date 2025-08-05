@@ -1,0 +1,18 @@
+🏃 Medoid Calculation Benchmark - ARM64
+
+📊 Testing with 1000 vectors × 128 dimensions
+V1 Original: 116 μs (medoid: 462)
+V2 Unsafe:   102 μs (medoid: 462) - 1.14x speedup
+V3 NEON:     44 μs (medoid: 462) - 2.60x speedup
+
+📊 Testing with 10000 vectors × 128 dimensions
+V1 Original: 1371 μs (medoid: 7121)
+V2 Unsafe:   1266 μs (medoid: 7121) - 1.08x speedup
+V3 NEON:     734 μs (medoid: 7121) - 1.87x speedup
+
+📊 Testing with 25000 vectors × 128 dimensions
+V1 Original: 3516 μs (medoid: 4901)
+V2 Unsafe:   3310 μs (medoid: 4901) - 1.06x speedup
+V3 NEON:     2129 μs (medoid: 4901) - 1.65x speedup
+
+📊 C++ Reference (25K vectors): 3,466 μs

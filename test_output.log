@@ -1,0 +1,236 @@
+   Compiling diskann v0.1.0 (/root/diskann-rust-arm64)
+warning: unused import: `crate::utils::generate_random_vectors`
+   --> src/search/filtered.rs:360:9
+    |
+360 |     use crate::utils::generate_random_vectors;
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(unused_imports)]` on by default
+
+error[E0624]: method `find_medoid_scalar` is private
+   --> src/graph/vamana_tests.rs:103:31
+    |
+103 |     let scalar_medoid = graph.find_medoid_scalar(&vectors).unwrap();
+    |                               ^^^^^^^^^^^^^^^^^^ private method
+    |
+   ::: src/graph/vamana.rs:157:5
+    |
+157 |     fn find_medoid_scalar(&self, vectors: &[Vec<f32>]) -> Result<usize> {
+    |     ------------------------------------------------------------------- private method defined here
+
+error[E0624]: method `find_medoid_neon` is private
+   --> src/graph/vamana_tests.rs:108:33
+    |
+108 |         let neon_medoid = graph.find_medoid_neon(&vectors).unwrap();
+    |                                 ^^^^^^^^^^^^^^^^ private method
+    |
+   ::: src/graph/vamana.rs:188:5
+    |
+188 |     fn find_medoid_neon(&self, vectors: &[Vec<f32>]) -> Result<usize> {
+    |     ----------------------------------------------------------------- private method defined here
+
+warning: unused import: `rayon::prelude`
+  --> src/graph/vamana.rs:16:5
+   |
+16 | use rayon::prelude::*;
+   |     ^^^^^^^^^^^^^^
+
+warning: unused import: `crate`
+  --> src/cli/info.rs:11:5
+   |
+11 | use crate::*;
+   |     ^^^^^
+
+warning: unused variable: `query`
+  --> src/distance/mod.rs:77:33
+   |
+77 |     fn distance_to_query(&self, query: &[f32], target_id: usize) -> Result<f32> {
+   |                                 ^^^^^ help: if this is intentional, prefix it with an underscore: `_query`
+   |
+   = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `target_id`
+  --> src/distance/mod.rs:77:48
+   |
+77 |     fn distance_to_query(&self, query: &[f32], target_id: usize) -> Result<f32> {
+   |                                                ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_target_id`
+
+warning: unused variable: `search_size`
+   --> src/graph/vamana.rs:364:21
+    |
+364 |                 let search_size = if i < self.num_vertices / 4 {
+    |                     ^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_search_size`
+
+warning: variable does not need to be mutable
+   --> src/graph/vamana.rs:471:13
+    |
+471 |         let mut candidates: Vec<usize> = graph[vertex_id].clone();
+    |             ----^^^^^^^^^^
+    |             |
+    |             help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` on by default
+
+warning: variable does not need to be mutable
+   --> src/graph/vamana.rs:807:13
+    |
+807 |         let mut candidates: Vec<usize> = graph[vertex_id].clone();
+    |             ----^^^^^^^^^^
+    |             |
+    |             help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src/graph/prune.rs:127:5
+    |
+127 |     mut distance_fn: F,
+    |     ----^^^^^^^^^^^
+    |     |
+    |     help: remove this `mut`
+
+warning: unused variable: `i`
+  --> src/index/memory.rs:49:14
+   |
+49 |         for (i, vec) in vectors.iter().enumerate() {
+   |              ^ help: if this is intentional, prefix it with an underscore: `_i`
+
+warning: unused variable: `result`
+    --> src/index/disk.rs:1442:13
+     |
+1442 |         let result = index.search(&wrong_dim_query, 5, 20);
+     |             ^^^^^^ help: if this is intentional, prefix it with an underscore: `_result`
+
+warning: unused variable: `path`
+    --> src/index/disk.rs:1470:20
+     |
+1470 |     fn save(&self, path: &str) -> Result<()> {
+     |                    ^^^^ help: if this is intentional, prefix it with an underscore: `_path`
+
+warning: unused variable: `id1`
+   --> src/index/dynamic.rs:470:13
+    |
+470 |         let id1 = index.insert(vec![1.0, 0.0, 0.0, 0.0], vec![1]).unwrap();
+    |             ^^^ help: if this is intentional, prefix it with an underscore: `_id1`
+
+warning: unused variable: `id3`
+   --> src/index/dynamic.rs:472:13
+    |
+472 |         let id3 = index.insert(vec![0.0, 0.0, 1.0, 0.0], vec![3]).unwrap();
+    |             ^^^ help: if this is intentional, prefix it with an underscore: `_id3`
+
+warning: unused variable: `path`
+   --> src/index/mod.rs:153:34
+    |
+153 |     pub fn build_from_file(self, path: &str) -> Result<Box<dyn Index>> {
+    |                                  ^^^^ help: if this is intentional, prefix it with an underscore: `_path`
+
+warning: unused variable: `pq_distance_fn`
+   --> src/pq/index.rs:165:13
+    |
+165 |         let pq_distance_fn = PQDistanceFunction {
+    |             ^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_pq_distance_fn`
+
+warning: unused variable: `graph`
+   --> src/pq/index.rs:262:21
+    |
+262 |             let mut graph = self.graph.write();
+    |                     ^^^^^ help: if this is intentional, prefix it with an underscore: `_graph`
+
+warning: variable does not need to be mutable
+   --> src/pq/index.rs:262:17
+    |
+262 |             let mut graph = self.graph.write();
+    |                 ----^^^^^
+    |                 |
+    |                 help: remove this `mut`
+
+warning: unused variable: `labels`
+   --> src/labels/mod.rs:246:32
+    |
+246 |             LabelFilter::Exact(labels) => {
+    |                                ^^^^^^ help: if this is intentional, prefix it with an underscore: `_labels`
+
+warning: unused variable: `metric`
+   --> src/compat/c_api.rs:116:9
+    |
+116 |     let metric = match metric {
+    |         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_metric`
+
+warning: unused variable: `index_ram_limit`
+  --> src/compat/c_api.rs:99:5
+   |
+99 |     index_ram_limit: c_uint,
+   |     ^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_index_ram_limit`
+
+warning: unused variable: `graph_ram_limit`
+   --> src/compat/c_api.rs:100:5
+    |
+100 |     graph_ram_limit: c_uint,
+    |     ^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_graph_ram_limit`
+
+warning: unused variable: `params`
+   --> src/compat/c_api.rs:187:9
+    |
+187 |     let params = &*params;
+    |         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_params`
+
+warning: unused variable: `beamwidth`
+   --> src/compat/c_api.rs:225:5
+    |
+225 |     beamwidth: c_uint,
+    |     ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_beamwidth`
+
+warning: unused variable: `search_ram_limit`
+   --> src/compat/c_api.rs:226:5
+    |
+226 |     search_ram_limit: c_uint,
+    |     ^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_search_ram_limit`
+
+warning: unused variable: `num_points`
+   --> src/compat/mod.rs:149:9
+    |
+149 |         num_points: usize,
+    |         ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_num_points`
+
+warning: unused variable: `dimension`
+   --> src/compat/mod.rs:150:9
+    |
+150 |         dimension: usize,
+    |         ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_dimension`
+
+warning: unused variable: `metric`
+   --> src/compat/mod.rs:151:9
+    |
+151 |         metric: Distance,
+    |         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_metric`
+
+warning: unused variable: `params`
+   --> src/compat/mod.rs:181:9
+    |
+181 |         params: &SearchParams,
+    |         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_params`
+
+warning: unused variable: `index_guard`
+   --> src/external/index/index_impl.rs:108:21
+    |
+108 |                 let index_guard = index.read();
+    |                     ^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_index_guard`
+
+warning: variable does not need to be mutable
+   --> src/external/index/index_impl.rs:139:17
+    |
+139 |             let mut index = dynamic.write();
+    |                 ----^^^^^
+    |                 |
+    |                 help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src/external/index/index_impl.rs:172:17
+    |
+172 |             let mut index = dynamic.write();
+    |                 ----^^^^^
+    |                 |
+    |                 help: remove this `mut`
+
+For more information about this error, try `rustc --explain E0624`.
+warning: `diskann` (lib test) generated 32 warnings
+error: could not compile `diskann` (lib test) due to 2 previous errors; 32 warnings emitted

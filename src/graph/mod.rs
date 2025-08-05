@@ -6,6 +6,15 @@ pub mod vamana;
 pub mod search;
 pub mod prune;
 
+#[cfg(test)]
+mod vamana_tests;
+
+#[cfg(test)]
+mod frozen_tests;
+
+#[cfg(test)]
+mod parallel_tests;
+
 // Re-export main types
 pub use vamana::VamanaGraph;
 pub use search::SearchParams;

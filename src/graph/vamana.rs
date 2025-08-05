@@ -11,6 +11,7 @@ use hashbrown::HashSet;
 use std::cmp::Ordering;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering as AtomicOrdering};
+use rand::Rng;
 
 #[cfg(feature = "parallel")]
 use rayon::prelude::*;
@@ -112,10 +113,18 @@ impl VamanaGraph {
         let medoid = self.find_medoid(vectors)?;
         self.entry_point.store(medoid, AtomicOrdering::Relaxed);
         
-        // Build graph using sequential algorithm for now
-        // TODO: Implement proper parallel construction with frozen points
-        for i in 0..self.num_vertices {
-            self.insert_vertex(i, &vectors[i], vectors)?;
+        // Use parallel construction when available
+        #[cfg(feature = "parallel")]
+        {
+            self.link_parallel(vectors)?;
+        }
+        
+        #[cfg(not(feature = "parallel"))]
+        {
+            // Sequential fallback
+            for i in 0..self.num_vertices {
+                self.insert_vertex(i, &vectors[i], vectors)?;
+            }
         }
         
         // Final cleanup and pruning
@@ -143,7 +152,22 @@ impl VamanaGraph {
         
         let dimension = vectors[0].len();
         
-        // Step 1: Calculate centroid (average of all points) - O(n)
+        // Use NEON optimization on ARM64 when dimension is multiple of 4
+        #[cfg(all(target_arch = "aarch64", feature = "neon"))]
+        if dimension % 4 == 0 {
+            // For now, always use NEON when available since we primarily use L2
+            return self.find_medoid_neon(vectors);
+        }
+        
+        // Fallback to original implementation
+        self.find_medoid_scalar(vectors)
+    }
+    
+    fn find_medoid_scalar(&self, vectors: &[Vec<f32>]) -> Result<usize> {
+        let dimension = vectors[0].len();
+        let inv_n = 1.0 / self.num_vertices as f32;
+        
+        // Step 1: Calculate centroid
         let mut centroid = vec![0.0f32; dimension];
         for vector in vectors {
             for (i, &val) in vector.iter().enumerate() {
@@ -151,10 +175,10 @@ impl VamanaGraph {
             }
         }
         for val in centroid.iter_mut() {
-            *val /= self.num_vertices as f32;
+            *val *= inv_n;
         }
         
-        // Step 2: Find point closest to centroid - O(n)
+        // Step 2: Find closest point
         let mut min_distance = f32::MAX;
         let mut medoid = 0;
         
@@ -169,88 +193,128 @@ impl VamanaGraph {
         Ok(medoid)
     }
     
-    /// C++ DiskANN style parallel graph construction (equivalent to link() function)
-    #[cfg(feature = "parallel")]
-    fn link_parallel(&self, vectors: &[Vec<f32>]) -> Result<()> {
-        use rayon::prelude::*;
-        use std::sync::Mutex;
-        use std::collections::HashMap;
+    #[cfg(all(target_arch = "aarch64", feature = "neon"))]
+    fn find_medoid_neon(&self, vectors: &[Vec<f32>]) -> Result<usize> {
+        use std::arch::aarch64::*;
         
-        println!("     🔗 Building graph with Rust parallel processing...");
+        let dimension = vectors[0].len();
+        let num_vertices = vectors.len();
+        let inv_n = 1.0 / num_vertices as f32;
         
-        // Create visit order like C++ version
-        let visit_order: Vec<usize> = (0..self.num_vertices).collect();
-        let total_nodes = visit_order.len();
-        
-        // Progress tracking
-        let processed = std::sync::atomic::AtomicUsize::new(0);
-        
-        // Collect all graph updates first to reduce lock contention
-        let graph_updates: Mutex<HashMap<usize, Vec<usize>>> = Mutex::new(HashMap::new());
-        
-        // Step 1: Parallel computation of neighbors (no graph access)
-        visit_order
-            .par_chunks(500) // Smaller chunks for better load balancing
-            .try_for_each(|chunk| -> Result<()> {
-                let mut local_updates = HashMap::new();
-                
-                for &node in chunk {
-                    // Find neighbors using greedy search (read-only access to vectors)
-                    let candidates = self.greedy_search(&vectors[node], self.search_list_size, vectors)?;
-                    
-                    // Store candidates for this node
-                    let valid_neighbors: Vec<usize> = candidates
-                        .into_iter()
-                        .filter(|&neighbor_id| neighbor_id != node && neighbor_id < self.num_vertices)
-                        .collect();
-                    
-                    local_updates.insert(node, valid_neighbors);
-                    
-                    // Progress reporting
-                    let current = processed.fetch_add(1, AtomicOrdering::Relaxed);
-                    if current % 10000 == 0 && current > 0 {
-                        let progress = (100.0 * current as f64) / total_nodes as f64;
-                        println!("     📊 {:.1}% computed ({} threads)", 
-                                progress, rayon::current_num_threads());
-                    }
-                }
-                
-                // Merge local updates into global collection
-                {
-                    let mut global_updates = graph_updates.lock().unwrap();
-                    global_updates.extend(local_updates);
-                }
-                
-                Ok(())
-            })?;
-        
-        // Step 2: Apply all updates to graph with minimal locking
-        println!("     🔄 Applying graph updates...");
-        {
-            let mut graph = self.graph.write();
-            let updates = graph_updates.into_inner().unwrap();
+        // Step 1: Calculate centroid with NEON
+        let mut centroid = vec![0.0f32; dimension];
+        unsafe {
+            let centroid_ptr = centroid.as_mut_ptr();
             
-            // Clear all existing edges
-            for neighbors in graph.iter_mut() {
-                neighbors.clear();
+            for vector in vectors {
+                let vec_ptr = vector.as_ptr();
+                for j in (0..dimension).step_by(4) {
+                    let vec_vals = vld1q_f32(vec_ptr.add(j));
+                    let centroid_vals = vld1q_f32(centroid_ptr.add(j));
+                    let sum = vaddq_f32(centroid_vals, vec_vals);
+                    vst1q_f32(centroid_ptr.add(j), sum);
+                }
             }
             
-            // Apply forward edges
-            for (node, neighbors) in &updates {
-                graph[*node].extend(neighbors);
+            // Scale by 1/n
+            let inv_n_vec = vdupq_n_f32(inv_n);
+            for j in (0..dimension).step_by(4) {
+                let vals = vld1q_f32(centroid_ptr.add(j));
+                let scaled = vmulq_f32(vals, inv_n_vec);
+                vst1q_f32(centroid_ptr.add(j), scaled);
             }
+        }
+        
+        // Step 2: Find closest point with NEON
+        let mut min_distance = f32::MAX;
+        let mut medoid = 0;
+        
+        unsafe {
+            let centroid_ptr = centroid.as_ptr();
             
-            // Apply reverse edges for bidirectionality
-            for (node, neighbors) in &updates {
-                for &neighbor_id in neighbors {
-                    if !graph[neighbor_id].contains(node) {
-                        graph[neighbor_id].push(*node);
-                    }
+            for (i, vector) in vectors.iter().enumerate() {
+                let vec_ptr = vector.as_ptr();
+                let mut sum_vec = vdupq_n_f32(0.0);
+                
+                for j in (0..dimension).step_by(4) {
+                    let centroid_vals = vld1q_f32(centroid_ptr.add(j));
+                    let vec_vals = vld1q_f32(vec_ptr.add(j));
+                    let diff = vsubq_f32(centroid_vals, vec_vals);
+                    sum_vec = vfmaq_f32(sum_vec, diff, diff);
+                }
+                
+                let sum = vaddvq_f32(sum_vec);
+                if sum < min_distance {
+                    min_distance = sum;
+                    medoid = i;
                 }
             }
         }
         
+        Ok(medoid)
+    }
+    
+    /// C++ DiskANN style parallel graph construction with frozen points
+    #[cfg(feature = "parallel")]
+    fn link_parallel(&self, vectors: &[Vec<f32>]) -> Result<()> {
+        use rayon::prelude::*;
+        use parking_lot::Mutex;
+        use std::sync::atomic::AtomicUsize;
+        
+        println!("     🔗 Building graph with Rust parallel processing...");
+        println!("     📊 Using {} threads", rayon::current_num_threads());
+        
+        let start_time = std::time::Instant::now();
+        
+        // Step 1: Initialize with frozen points (sequential but fast)
+        // This matches C++ DiskANN's approach of using alpha * R points
+        let num_frozen = (self.alpha * self.max_degree as f32).ceil() as usize;
+        let num_frozen = num_frozen.min(self.num_vertices / 10); // Cap at 10% of nodes
+        
+        println!("     🧊 Initializing with {} frozen points...", num_frozen);
+        
+        // Initialize frozen points sequentially
+        for i in 0..num_frozen {
+            self.insert_vertex(i, &vectors[i], vectors)?;
+        }
+        
+        // Step 2: Parallel construction for remaining nodes
+        let remaining_nodes: Vec<usize> = (num_frozen..self.num_vertices).collect();
+        let total_remaining = remaining_nodes.len();
+        let processed = AtomicUsize::new(0);
+        let last_reported = AtomicUsize::new(0);
+        
+        // Process in parallel with dynamic scheduling
+        // Use C++ DiskANN's chunk size of 2048
+        const CHUNK_SIZE: usize = 2048;
+        
+        remaining_nodes
+            .par_chunks(CHUNK_SIZE)
+            .try_for_each(|chunk| -> Result<()> {
+                for &node_id in chunk {
+                    // Insert vertex using existing graph structure
+                    self.insert_vertex(node_id, &vectors[node_id], vectors)?;
+                    
+                    // Progress reporting
+                    let current = processed.fetch_add(1, AtomicOrdering::Relaxed) + 1;
+                    let last = last_reported.load(AtomicOrdering::Relaxed);
+                    
+                    // Report every 5% progress
+                    if current >= last + (total_remaining / 20) {
+                        let progress = (100.0 * current as f64) / total_remaining as f64;
+                        println!("     📊 {:.1}% completed", progress);
+                        last_reported.store(current, AtomicOrdering::Relaxed);
+                    }
+                }
+                Ok(())
+            })?;
+        
+        let elapsed = start_time.elapsed();
+        let build_rate = self.num_vertices as f64 / elapsed.as_secs_f64();
+        
         println!("     ✅ Parallel graph construction completed!");
+        println!("     ⏱️  Time: {:.2}s ({:.0} vectors/sec)", elapsed.as_secs_f64(), build_rate);
+        
         Ok(())
     }
     
@@ -557,6 +621,13 @@ impl VamanaGraph {
             min_degree,
             entry_point: self.entry_point.load(AtomicOrdering::Relaxed),
         }
+    }
+    
+    /// Get degree distribution for testing
+    #[cfg(test)]
+    pub fn get_degree_distribution(&self) -> Vec<usize> {
+        let graph = self.graph.read();
+        graph.iter().map(|neighbors| neighbors.len()).collect()
     }
     
     /// Insert a single vertex dynamically
