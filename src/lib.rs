@@ -45,7 +45,7 @@ pub mod compat;
 pub mod external;
 
 /// CLI configuration structure
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Cli {
     pub verbose: bool,
     pub no_progress: bool,
