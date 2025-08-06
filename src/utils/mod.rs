@@ -4,6 +4,9 @@
 
 pub mod metrics;
 pub mod aligned;
+pub mod numa;
+pub mod containers;
+pub mod stats;
 
 use std::fs::File;
 use std::io::{BufReader, Read};
