@@ -422,8 +422,8 @@ mod tests {
         let index = LabelIndex::build(labels);
         
         // Test vector labels
-        assert_eq!(index.get_labels(0).unwrap().labels(), &[1, 2]);
-        assert_eq!(index.get_labels(3).unwrap().labels(), &[UNIVERSAL_LABEL]);
+        assert_eq!(index.get_labels(0).unwrap(), vec![1, 2]);
+        assert_eq!(index.get_labels(3).unwrap(), vec![UNIVERSAL_LABEL]);
         
         // Test inverted index
         assert_eq!(index.get_vectors_with_label(1), &[0, 2]);

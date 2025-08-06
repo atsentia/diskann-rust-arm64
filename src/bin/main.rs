@@ -66,12 +66,18 @@ fn main() -> diskann::Result<()> {
         println!();
     }
     
+    // Convert CLI to library format
+    let lib_cli = diskann::Cli {
+        verbose: cli.verbose,
+        no_progress: cli.no_progress,
+    };
+    
     // Execute command
     match cli.command {
-        Commands::Build(args) => build::run(args, &cli),
-        Commands::Search(args) => search::run(args, &cli),
-        Commands::Benchmark(args) => benchmark::run(args, &cli),
-        Commands::Convert(args) => convert::run(args, &cli),
-        Commands::Info(args) => info::run(args, &cli),
+        Commands::Build(args) => build::run(args, &lib_cli),
+        Commands::Search(args) => search::run(args, &lib_cli),
+        Commands::Benchmark(args) => benchmark::run(args, &lib_cli),
+        Commands::Convert(args) => convert::run(args, &lib_cli),
+        Commands::Info(args) => info::run(args, &lib_cli),
     }
 }
