@@ -1,0 +1,5 @@
+error: no test target named `comprehensive_parity_tests::test_tier1_foundational` in default-run packages
+help: available test targets:
+    comprehensive_parity_tests
+    correctness_validation
+    integration_tests
