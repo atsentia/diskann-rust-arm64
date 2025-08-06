@@ -35,6 +35,8 @@ log = "0.4"
 env_logger = "0.11"
 sysinfo = "0.30"
 
+# System dependencies for NUMA and direct I/O
+libc = "0.2"
 
 # Math and SIMD
 num-traits = "0.2"
@@ -150,6 +152,10 @@ path = "examples/real_world_datasets.rs"
 [[example]]
 name = "memory_scaling"
 path = "examples/memory_scaling.rs"
+
+[[example]]
+name = "advanced_features_demo"
+path = "examples/advanced_features_demo.rs"
 
 [profile.release]
 lto = "fat"
